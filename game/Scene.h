@@ -25,19 +25,26 @@ protected:
     GameState   mGameState;
     Vector2     mOrigin;
     const char *mBGColourHexCode = "#000000";
-
+    bool isKeyAcquired = false;
+    bool reachedDoor = false;
+    Vector2 mSpawnPoint;
 public:
     Scene();
     Scene(Vector2 origin, const char *bgHexCode);
     virtual ~Scene() {}
 
-    virtual void initialise() = 0;
+    virtual void initialize() = 0;
     virtual void update(float deltaTime) = 0;
     virtual void render() = 0;
     virtual void shutdown() = 0;
+    virtual void reset() = 0;
 
     GameState&   getState()          { return mGameState;        }
     Vector2     getOrigin()          const { return mOrigin;           }
+    Vector2 getSpawnPoint() const {return mSpawnPoint;}
+    void setSpawnPoint(Vector2 spawn) {mSpawnPoint = spawn;}
+
+    bool getIsKeyAcquired() const {return isKeyAcquired;}
     const char *getBGColourHexCode() const { return mBGColourHexCode; }
 
 };

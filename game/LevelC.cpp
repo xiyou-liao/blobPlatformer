@@ -1,16 +1,16 @@
 #include "LevelC.h"
 
 LevelC::LevelC()
-    : Scene{ { 0.0f, 0.0f }, "#000000" }
+    : Scene{ { 0.0f, 0.0f },  "#000000" }
 {}
 
 LevelC::LevelC(Vector2 origin, const char *bgHexCode)
-    : Scene{ origin, bgHexCode }
+    : Scene{ origin,  bgHexCode }
 {}
 
 LevelC::~LevelC() { shutdown(); }
 
-void LevelC::initialise()
+void LevelC::initialize()
 {
     mGameState.nextSceneID = NO_SCENE;
 
@@ -94,4 +94,11 @@ void LevelC::shutdown()
     mGameState.bgm = {};
     UnloadSound(mGameState.jumpSound);
     mGameState.jumpSound = {};
+}
+void LevelC::reset() {
+    for (size_t i = 0; i<mGameState.entities.size(); i++) {
+        delete mGameState.entities[i];
+    }
+    mGameState.entities.clear();
+    initialize();
 }

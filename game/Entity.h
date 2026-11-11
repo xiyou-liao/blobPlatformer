@@ -5,7 +5,7 @@
 
 enum Direction    { LEFT, UP, RIGHT, STILL, THROW, HURT              }; // For walking
 enum EntityStatus { ACTIVE, INACTIVE                   };
-enum EntityType   { PLAYER, BLOCK, PLATFORM, NPC, NONE, TARGET };
+enum EntityType   { PLAYER, BLOCK, PLATFORM, NPC, NONE, KEY, DOOR };
 enum AIType       { WANDERER, FOLLOWER                 };
 enum AIState      { WALKING, IDLE, FOLLOWING           };
 
@@ -52,6 +52,7 @@ private:
     AIState mAIState;
     bool acquired = false;
     bool isFlying = false;
+    bool exitReached = false;
 
     bool isColliding(Entity *other) const;
 
@@ -105,7 +106,7 @@ public:
         const std::vector<Entity*>& collidableEntities
     );
     void render();
-    void normaliseMovement() { Normalize(&mMovement); }
+    void normalizeMovement() { Normalize(&mMovement); }
 
     void jump()       { mIsJumping = true;         }
     void throwPlatform();
@@ -152,6 +153,9 @@ public:
         mHighestY = mPosition.y;
     }
     bool getAcquired() const {return acquired;}
+    bool getExitReached() const {return exitReached;}
+
+
     bool isCollidingTop()    const { return mIsCollidingTop;    }
     bool isCollidingBottom() const { return mIsCollidingBottom; }
 

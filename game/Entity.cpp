@@ -89,12 +89,16 @@ void Entity::checkCollisionY(
                 mPosition.y        -= yOverlap;
                 mVelocity.y         = 0;
                 mIsCollidingBottom  = true;
+                if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
+                if (collidableEntity->getEntityType() == DOOR) exitReached = true;
             }
             else if (mVelocity.y < 0)
             {
                 mPosition.y     += yOverlap;
                 mVelocity.y      = 0;
                 mIsCollidingTop  = true;
+                if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
+                if (collidableEntity->getEntityType() == DOOR) exitReached = true;
             }
         }
     }
@@ -138,6 +142,8 @@ void Entity::checkCollisionX(
 
                 // Collision!
                 mIsCollidingRight = true;
+                if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
+                if (collidableEntity->getEntityType() == DOOR) exitReached = true;
             }
             else if (mVelocity.x < 0)
             {
@@ -146,7 +152,8 @@ void Entity::checkCollisionX(
 
                 // Collision!
                 mIsCollidingLeft = true;
-                if (collidableEntity->getEntityType() == TARGET) collidableEntity->setAcquired();
+                if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
+                if (collidableEntity->getEntityType() == DOOR) exitReached = true;
             }
         }
     }
@@ -192,6 +199,10 @@ void Entity::checkCollisionY(Map *map)
         mPosition.y     += yOverlap * 1.01f; // push down
         mVelocity.y      = 0.0f;
         mIsCollidingTop  = true;
+        if (mEntityType == PLATFORM) {
+            setAcceleration({0.0f, 0.0f});
+            setVelocity({0.0f, 0.0f});
+        }
     }
 
     // COLLISION BELOW (falling downward)
@@ -203,7 +214,10 @@ void Entity::checkCollisionY(Map *map)
         mPosition.y        -= yOverlap; // push up
         mVelocity.y         = 0.0f;
         mIsCollidingBottom  = true;
-
+        if (mEntityType == PLATFORM) {
+            setAcceleration({0.0f, 0.0f});
+            setVelocity({0.0f, 0.0f});
+        }
     }
 }
 
@@ -228,6 +242,10 @@ void Entity::checkCollisionX(Map *map)
         mPosition.x       -= xOverlap * 1.01f; // push left
         mVelocity.x        = 0.0f;
         mIsCollidingRight  = true;
+        if (mEntityType == PLATFORM) {
+            setAcceleration({0.0f, 0.0f});
+            setVelocity({0.0f, 0.0f});
+        }
     }
 
     // COLLISION ON LEFT (moving left)
@@ -237,6 +255,10 @@ void Entity::checkCollisionX(Map *map)
         mPosition.x      += xOverlap * 1.01f; // push right
         mVelocity.x       = 0.0f;
         mIsCollidingLeft  = true;
+        if (mEntityType == PLATFORM) {
+            setAcceleration({0.0f, 0.0f});
+            setVelocity({0.0f, 0.0f});
+        }
     }
 }
 
@@ -376,11 +398,11 @@ void Entity::update(
         mVelocity.x += mAcceleration.x * deltaTime;
         mVelocity.y += mAcceleration.y * deltaTime;
         mPosition.y += mVelocity.y * deltaTime;
-      //  checkCollisionY(collidableEntities);
-
+        checkCollisionY(collidableEntities);
+        checkCollisionY(map);
         mPosition.x += mVelocity.x * deltaTime;
-      //  checkCollisionX(collidableEntities);
-
+        checkCollisionX(collidableEntities);
+        checkCollisionX(map);
         int maxFallDistance = 150.0f;
        // float highestY = mPosition.y;
         if (mPosition.y < mHighestY) {
@@ -391,9 +413,11 @@ void Entity::update(
             stopFlying();
         }
     }
-    else if (mEntityType != PLATFORM) {
+    // if (mEntityType == KEY && acquired) {
+    //     mPosition = {player->getPosition().x, player->getPosition().y - player->getColliderDimensions().y / 2.0f};
+    // }
+    if (mEntityType != PLATFORM && mEntityType != KEY) {
         mVelocity.x = mMovement.x * mSpeed;
-
         mVelocity.x += mAcceleration.x * deltaTime;
         mVelocity.y += mAcceleration.y * deltaTime;
     }
@@ -409,7 +433,7 @@ void Entity::update(
         mVelocity.y -= mJumpingPower;
     }
 
-    if (mEntityType != PLATFORM) {
+    if (mEntityType != PLATFORM && mEntityType!= KEY) {
         mPosition.y += mVelocity.y * deltaTime;
         checkCollisionY(collidableEntities);
         checkCollisionY(map);

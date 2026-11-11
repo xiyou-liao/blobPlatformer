@@ -10,11 +10,11 @@ LevelB::LevelB(Vector2 origin, const char *bgHexCode)
 
 LevelB::~LevelB() { shutdown(); }
 
-void LevelB::initialise()
+void LevelB::initialize()
 {
     mGameState.nextSceneID = NO_SCENE;
 
-   // mGameState.bgm = LoadMusicStream("assets/game/04 - Silent Forest.wav");
+    //mGameState.bgm = LoadMusicStream("assets/game/04 - Silent Forest.wav");
     SetMusicVolume(mGameState.bgm, 0.33f);
     PlayMusicStream(mGameState.bgm);
 
@@ -38,29 +38,46 @@ void LevelB::initialise()
     std::map<Direction, std::vector<int>> blobAnimationAtlas = {
         { STILL,  {0, 1, 2, 3, 4, 5} },
         { RIGHT,  {6, 7, 8, 9, 10, 11} },
-        { UP,    {12, 13, 14, 15, 16, 17} },
-        { LEFT, {18, 19, 20, 21, 22, 23} },
+        { LEFT,    {12, 13, 14, 15, 16, 17} },
+        { THROW,    {18, 19, 20, 21, 22, 23} },
+        { HURT,    {24, 25, 26, 27, 28, 29} }
+
     };
 
-    float sizeRatio = 48.0f / 64.0f;
+    float sizeRatio = 45.0f/60.0f;
 
-    // Assets from @see https://sscary.itch.io/the-adventurer-female
     mGameState.blob = new Entity(
-        { mOrigin.x - 300.0f, mOrigin.y - 200.0f }, // position
-        { 250.0f * sizeRatio, 250.0f },             // scale
+        {mGameState.map->getLeftBoundary(), mGameState.map->getTopBoundary()}, // position
+        { 100.0f * sizeRatio, 100.0f },             // scale
         "assets/blob.png",                     // texture file address
         ATLAS,                                      // single image or atlas?
-        { 6, 8 },                                   // atlas dimensions
+        { 5, 6 },                                   // atlas dimensions
         blobAnimationAtlas,                      // actual atlas
         PLAYER                                      // entity type
     );
 
+    mGameState.blob->setLives(6);
     mGameState.blob->setJumpingPower(550.0f);
     mGameState.blob->setColliderDimensions({
-        mGameState.blob->getScale().x / 3.5f,
-        mGameState.blob->getScale().y / 3.0f
+        mGameState.blob->getScale().x / 3.0f,
+        mGameState.blob->getScale().y / 2.5f
     });
     mGameState.blob->setAcceleration({ 0.0f, ACCELERATION_OF_GRAVITY });
+
+    Entity* flowers = new Entity{
+        mGameState.map->getCoords(5, 21),
+        {100.0f, 100.0f},
+        "assets/flowers.png",
+        KEY
+    };
+    Entity* door = new Entity{
+        {mGameState.map->getCoords(8, 38)},
+        {500.0f, 500.0f},
+        "assets/door.png",
+        DOOR
+    };
+    mGameState.entities.push_back(flowers);
+    mGameState.entities.push_back(door);
 }
 
 void LevelB::update(float deltaTime)
@@ -71,9 +88,29 @@ void LevelB::update(float deltaTime)
         deltaTime,      // delta time / fixed timestep
         nullptr,        // player
         mGameState.map, // map
-        mGameState.entities       // collidable entities
+        mGameState.entities        // collidable entities
                       // col. entity count
     );
+
+    for (size_t i = 0; i < mGameState.entities.size(); i++) {
+        if (mGameState.entities[i] == nullptr) continue;
+       // if (mGameState.entities[i]->getEntityType() == PLATFORM) {
+            std::vector<Entity*> blank;
+            mGameState.entities[i]->update(
+                deltaTime,
+                mGameState.blob,
+                mGameState.map,
+                blank);
+      //  }
+          if (!mGameState.entities[i]->isActive()) {
+              mGameState.entities[i] = nullptr;
+          }
+        if (mGameState.entities[i]->getEntityType() == KEY && mGameState.entities[i]->getAcquired()) {
+            isKeyAcquired = true;
+        }
+    }
+    if (isKeyAcquired)
+        mGameState.nextSceneID = LEVEL_C;
 }
 
 void LevelB::render()
@@ -82,6 +119,10 @@ void LevelB::render()
 
     mGameState.blob->render();
     mGameState.map->render();
+    for (size_t i = 0; i<mGameState.entities.size(); i++) {
+        if (mGameState.entities[i]->getEntityType() == KEY && mGameState.entities[i]->getAcquired()) continue;
+        mGameState.entities[i]->render();
+    }
 }
 
 void LevelB::shutdown()
@@ -95,4 +136,11 @@ void LevelB::shutdown()
     mGameState.bgm = {};
     UnloadSound(mGameState.jumpSound);
     mGameState.jumpSound = {};
+}
+void LevelB::reset() {
+    for (size_t i = 0; i<mGameState.entities.size(); i++) {
+        delete mGameState.entities[i];
+    }
+    mGameState.entities.clear();
+    initialize();
 }

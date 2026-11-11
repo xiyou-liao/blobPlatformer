@@ -10,7 +10,7 @@ LevelA::LevelA(Vector2 origin, const char *bgHexCode)
 
 LevelA::~LevelA() { shutdown(); }
 
-void LevelA::initialise()
+void LevelA::initialize()
 {
     mGameState.nextSceneID = NO_SCENE;
 
@@ -46,8 +46,10 @@ void LevelA::initialise()
 
     float sizeRatio = 45.0f/60.0f;
 
+    Vector2 spawn = {mGameState.map->getLeftBoundary(), mGameState.map->getTopBoundary()};
+    mSpawnPoint = spawn;
     mGameState.blob = new Entity(
-        { 50.0f, mOrigin.y }, // position
+        spawn, // position
         { 100.0f * sizeRatio, 100.0f },             // scale
         "assets/blob.png",                     // texture file address
         ATLAS,                                      // single image or atlas?
@@ -65,12 +67,19 @@ void LevelA::initialise()
     mGameState.blob->setAcceleration({ 0.0f, ACCELERATION_OF_GRAVITY });
 
     Entity* flowers = new Entity{
-        mGameState.map->getCoords(4, 21),
+        mGameState.map->getCoords(6, 21),
         {100.0f, 100.0f},
         "assets/flowers.png",
-        TARGET
+        KEY
+    };
+    Entity* door = new Entity{
+        {mGameState.map->getCoords(9, 38)},
+        {75.0f, 75.0f},
+        "assets/door.png",
+        DOOR
     };
     mGameState.entities.push_back(flowers);
+    mGameState.entities.push_back(door);
 }
 
 void LevelA::update(float deltaTime)
@@ -84,19 +93,27 @@ void LevelA::update(float deltaTime)
         mGameState.entities        // collidable entities
                       // col. entity count
     );
-
+    if (mGameState.blob->getPosition().y > 1200.0f) reset();
     for (size_t i = 0; i < mGameState.entities.size(); i++) {
-        if (mGameState.entities[i]->getEntityType() == PLATFORM) {
+        if (mGameState.entities[i] == nullptr) continue;
+       // if (mGameState.entities[i]->getEntityType() == PLATFORM) {
             std::vector<Entity*> blank;
             mGameState.entities[i]->update(
                 deltaTime,
-                nullptr,
+                mGameState.blob,
                 mGameState.map,
                 blank);
+      //  }
+          if (!mGameState.entities[i]->isActive()) {
+              mGameState.entities[i] = nullptr;
+          }
+        if (mGameState.entities[i]->getEntityType() == KEY && mGameState.entities[i]->getAcquired()) {
+            isKeyAcquired = true;
         }
     }
-    // if (mGameState.blob->getPosition().y > END_GAME_THRESHOLD)
-    //     mGameState.nextSceneID = LEVEL_B;
+    if (mGameState.blob->getExitReached()) reachedDoor = true;
+    if (isKeyAcquired && reachedDoor)
+        mGameState.nextSceneID = LEVEL_B;
 }
 
 void LevelA::render()
@@ -106,7 +123,7 @@ void LevelA::render()
     mGameState.blob->render();
     mGameState.map->render();
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
-        if (mGameState.entities[i]->getEntityType() == TARGET && mGameState.entities[i]->getAcquired()) continue;
+        if (mGameState.entities[i]->getEntityType() == KEY && mGameState.entities[i]->getAcquired()) continue;
         mGameState.entities[i]->render();
     }
 }
@@ -122,4 +139,15 @@ void LevelA::shutdown()
     mGameState.bgm = {};
     UnloadSound(mGameState.jumpSound);
     mGameState.jumpSound = {};
+}
+
+void LevelA::reset() {
+    std:: cout << "in reset!" << std::endl;
+    for (size_t i = 0; i<mGameState.entities.size(); i++) {
+        delete mGameState.entities[i];
+    }
+    delete mGameState.blob;
+    mGameState.entities.clear();
+    delete mGameState.map;
+    initialize();
 }

@@ -29,9 +29,10 @@ public:
     LevelC(Vector2 origin, const char *bgHexCode);
     ~LevelC();
 
-    void initialise() override;
+    void initialize() override;
     void update(float deltaTime) override;
     void render() override;
     void shutdown() override;
+    void reset() override;
 };
 #endif //LEVELC_H

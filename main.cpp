@@ -38,15 +38,14 @@ void switchToScene(Scene *scene)
 {
     if (gCurrentScene) gCurrentScene->shutdown();
     gCurrentScene = scene;
-    gCurrentScene->initialise();
+    gCurrentScene->initialize();
     gCamera.target = gCurrentScene->getState().blob->getPosition();
 }
 
-void initialise()
-{
+void initialise() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Blob Platformer");
 
-    gLevels[LEVEL_A] = new LevelA(ORIGIN, "#DAD7CD");
+    gLevels[LEVEL_A] = new LevelA(ORIGIN, "#3A5A40");
     gLevels[LEVEL_B] = new LevelB(ORIGIN, "#DAD7CD");
     gLevels[LEVEL_C] = new LevelC(ORIGIN, "DAD7CD");
 
@@ -63,72 +62,56 @@ void processInput()
 {
     gCurrentScene->getState().blob->resetMovement();
 
-   // if (!placePlatform) {
-        if      (IsKeyDown(KEY_A)) gCurrentScene->getState().blob->moveLeft();
-        else if (IsKeyDown(KEY_D)) gCurrentScene->getState().blob->moveRight();
+    if      (IsKeyDown(KEY_A)) gCurrentScene->getState().blob->moveLeft();
+    else if (IsKeyDown(KEY_D)) gCurrentScene->getState().blob->moveRight();
 
-        if (IsKeyPressed(KEY_W) && gCurrentScene->getState().blob->isCollidingBottom())
-        {
-            gCurrentScene->getState().blob->jump();
-        }
-        if (!IsKeyDown(KEY_A) && !IsKeyDown(KEY_D) && !IsKeyDown(KEY_W)) gCurrentScene->getState().blob->standStill();
+    if (IsKeyPressed(KEY_W) && gCurrentScene->getState().blob->isCollidingBottom())
+    {
+        gCurrentScene->getState().blob->jump();
+    }
+    if (!IsKeyDown(KEY_A) && !IsKeyDown(KEY_D) && !IsKeyDown(KEY_W)) gCurrentScene->getState().blob->standStill();
         // to avoid faster diagonal speed
-   // }
-   // if (IsKeyPressed(KEY_T)) {
-    //  //   std::cout<<"keyT is pressed!" << std::endl;
-    //     if (!placePlatform) {
-    //         placePlatform = true;
-    //
-    //         gCurrentScene->getState().blob->throwPlatform();
-    //     }
-    //     else placePlatform = false;
-    // }
-    // if (IsKeyPressed(KEY_F)) {
-    //     if (!absorbPlatform) absorbPlatform = true;
-    //     else absorbPlatform = false;
-    // }
+    if (GetLength(gCurrentScene->getState().blob->getMovement()) > 1.0f) {
+        gCurrentScene->getState().blob->normalizeMovement();
+    }
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         placePlatform = true;
     }
     if (placePlatform && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            Vector2 mousePosition = GetMousePosition();
-            Vector2 blobPosition = gCurrentScene->getState().blob->getPosition();
-            Vector2 worldMousePosition = {
-                mousePosition.x - gCamera.offset.x + gCamera.target.x,
-                mousePosition.y - gCamera.offset.y + gCamera.target.y
+        Vector2 mousePosition = GetMousePosition();
+        Vector2 blobPosition = gCurrentScene->getState().blob->getPosition();
+        Vector2 worldMousePosition = {
+            mousePosition.x - gCamera.offset.x + gCamera.target.x,
+            mousePosition.y - gCamera.offset.y + gCamera.target.y
+        };
+        Vector2 direction = {
+            worldMousePosition.x - blobPosition.x,
+            worldMousePosition.y - blobPosition.y
+        };
+    if (GetLength(direction) > 0.0f) Normalize(&direction);
+        if (gCurrentScene->getState().blob->getLives() > 1) {
+            Entity* newPlatform = new Entity{
+                {blobPosition.x, blobPosition.y - gCurrentScene->getState().blob->getColliderDimensions().y },
+                {50.0f, 50.0f},
+                "assets/platform.png",
+                PLATFORM
             };
-            Vector2 direction = {
-                worldMousePosition.x - blobPosition.x,
-                worldMousePosition.y - blobPosition.y
-            };
-        if (GetLength(direction) > 0.0f) Normalise(&direction);
-            if (gCurrentScene->getState().blob->getLives() > 1) {
-                Entity* newPlatform = new Entity{
-                    {blobPosition.x, blobPosition.y - gCurrentScene->getState().blob->getScale().y / 2.0f},
-                    {50.0f, 50.0f},
-                    "assets/blobPlatform.png",
-                    PLATFORM
-                };
-                float platformSpeed = 500.0f;
-                newPlatform->setSpeed(platformSpeed);
-                newPlatform->setAcceleration({0.0f, 981.0f});
-                newPlatform->setFlying();
-                newPlatform->setVelocity({direction.x * platformSpeed, direction.y * platformSpeed});
-               gCurrentScene->getState().entities.push_back(newPlatform);
+            float platformSpeed = 500.0f;
+            newPlatform->setSpeed(platformSpeed);
+            newPlatform->setAcceleration({0.0f, 981.0f});
+            newPlatform->setFlying();
+            newPlatform->setVelocity({direction.x * platformSpeed, direction.y * platformSpeed});
+            gCurrentScene->getState().entities.push_back(newPlatform);
 
-                gCurrentScene->getState().blob->decreaseLives();
-                placePlatform = false;
-            }
-        //}
+            gCurrentScene->getState().blob->decreaseLives();
+            placePlatform = false;
+        }
     }
-    // if (absorbPlatform) {
-    //
-    // }
 
 
     if (GetLength(gCurrentScene->getState().blob->getMovement()) > 1.0f)
-        gCurrentScene->getState().blob->normaliseMovement();
+        gCurrentScene->getState().blob->normalizeMovement();
 
     if (IsKeyPressed(KEY_Q) || WindowShouldClose()) gAppStatus = TERMINATED;
 }
@@ -173,13 +156,6 @@ void render()
     gCurrentScene->render();
 
     EndMode2D();
-    for (size_t i = 0; i<gCurrentScene->getState().entities.size(); i++) {
-        if (gCurrentScene->getState().entities[i]->getEntityType() == TARGET &&
-            gCurrentScene->getState().entities[i]->getAcquired()) {
-            gCurrentScene->getState().entities[i]->setPosition({SCREEN_WIDTH - 150.0f, 50.0f});
-            gCurrentScene->getState().entities[i]->render();
-        }
-    }
     EndDrawing();
 }
 

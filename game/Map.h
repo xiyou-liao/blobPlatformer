@@ -43,7 +43,9 @@ public:
     bool isSolidTileAt(Vector2 position, float *xOverlap, float *yOverlap);
 
     Vector2 getCoords(int row, int col) {
-        return {col * mTileSize + mTileSize/2.0f, row * mTileSize
+        return {
+            mLeftBoundary + col * mTileSize + mTileSize/2.0f, mTopBoundary + row * mTileSize - mTileSize/2.0f
+
         };
     }
     int           getMapColumns()     const { return mMapColumns;     }
