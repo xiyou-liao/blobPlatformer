@@ -63,13 +63,13 @@ Entity::~Entity() { UnloadTexture(mTexture); }
  * for collisions with the current entity.
  */
 void Entity::checkCollisionY(
-    Entity *collidableEntities, int collisionCheckCount
+    const std::vector<Entity*>& collidableEntities
 )
 {
-    for (int i = 0; i < collisionCheckCount; i++)
+    for (size_t i = 0; i<collidableEntities.size(); i++)
     {
         // STEP 1: For every entity that our player can collide with...
-        Entity *collidableEntity = &collidableEntities[i];
+        Entity* collidableEntity = collidableEntities[i];
 
         if (isColliding(collidableEntity))
         {
@@ -101,12 +101,13 @@ void Entity::checkCollisionY(
 }
 
 void Entity::checkCollisionX(
-    Entity *collidableEntities, int collisionCheckCount
+    const std::vector<Entity*>& collidableEntities
 )
 {
-    for (int i = 0; i < collisionCheckCount; i++)
+    for (size_t i = 0; i<collidableEntities.size(); i++)
     {
-        Entity *collidableEntity = &collidableEntities[i];
+        // STEP 1: For every entity that our player can collide with...
+        Entity* collidableEntity = collidableEntities[i];
 
         if (isColliding(collidableEntity))
         {
@@ -145,6 +146,7 @@ void Entity::checkCollisionX(
 
                 // Collision!
                 mIsCollidingLeft = true;
+                if (collidableEntity->getEntityType() == TARGET) collidableEntity->setAcquired();
             }
         }
     }
@@ -201,6 +203,7 @@ void Entity::checkCollisionY(Map *map)
         mPosition.y        -= yOverlap; // push up
         mVelocity.y         = 0.0f;
         mIsCollidingBottom  = true;
+
     }
 }
 
@@ -269,6 +272,7 @@ void Entity::animate(float deltaTime)
 {
     mAnimationIndices = mAnimationAtlas.at(mDirection);
 
+
     mAnimationTime += deltaTime;
     float secondsPerFrame = 1.0f / mFrameSpeed;
 
@@ -281,6 +285,10 @@ void Entity::animate(float deltaTime)
     }
 }
 
+void Entity::throwPlatform() {
+    mDirection = THROW;
+
+}
 void Entity::displayCollider()
 {
     // draw the collision box
@@ -347,13 +355,20 @@ void Entity::update(
     float   deltaTime,
     Entity *player,
     Map    *map,
-    Entity *collidableEntities,
-    int     collisionCheckCount
+    const std::vector<Entity*>& collidableEntities
 )
 {
     if (mEntityStatus == INACTIVE) return;
 
     if (mEntityType == NPC) AIActivate(player);
+
+    if (mEntityType == PLAYER) {
+        mScale = {100.0f * 45.0f / 60.0f * lives / 2.0f, 100.0f * lives / 2.0f};
+        mColliderDimensions = {
+        mScale.x / 2.0f,
+        mScale.y / 1.75f
+    };
+    }
 
     resetColliderFlags();
 
@@ -374,11 +389,11 @@ void Entity::update(
     }
 
     mPosition.y += mVelocity.y * deltaTime;
-    checkCollisionY(collidableEntities, collisionCheckCount);
+    checkCollisionY(collidableEntities);
     checkCollisionY(map);
 
     mPosition.x += mVelocity.x * deltaTime;
-    checkCollisionX(collidableEntities, collisionCheckCount);
+    checkCollisionX(collidableEntities);
     checkCollisionX(map);
 
     // Only animate if we're on the ground (not necessary)
@@ -439,5 +454,5 @@ void Entity::render()
         mAngle, WHITE
     );
 
-    // displayCollider();
+     displayCollider();
 }

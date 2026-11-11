@@ -9,7 +9,15 @@ add_executable(blobPlatformer main.cpp
         game/Map.h
         game/Map.cpp
         game/game.h
-        game/game.cpp)
+        game/game.cpp
+        game/Scene.h
+        game/Scene.cpp
+        game/LevelA.h
+        game/LevelA.cpp
+        game/LevelB.h
+        game/LevelB.cpp
+        game/LevelC.h
+        game/LevelC.cpp)
 
 target_include_directories(blobPlatformer PRIVATE
         C:/raylib/include

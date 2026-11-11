@@ -1,15 +1,11 @@
-//
-// Created by xiyou on 11/10/2026.
-//
-
 #ifndef ENTITY_H
 #define ENTITY_H
 
 #include "Map.h"
 
-enum Direction    { LEFT, UP, RIGHT, STILL              }; // For walking
+enum Direction    { LEFT, UP, RIGHT, STILL, THROW, HURT              }; // For walking
 enum EntityStatus { ACTIVE, INACTIVE                   };
-enum EntityType   { PLAYER, BLOCK, PLATFORM, NPC, NONE };
+enum EntityType   { PLAYER, BLOCK, PLATFORM, NPC, NONE, TARGET };
 enum AIType       { WANDERER, FOLLOWER                 };
 enum AIState      { WALKING, IDLE, FOLLOWING           };
 
@@ -33,7 +29,7 @@ private:
     Direction                             mDirection;
     int                                   mFrameSpeed;
 
-    int health = 0;
+    int lives = 0;
     int   mCurrentFrameIndex = 0;
     float mAnimationTime     = 0.0f;
 
@@ -53,13 +49,14 @@ private:
 
     AIType  mAIType;
     AIState mAIState;
+    bool acquired = false;
 
     bool isColliding(Entity *other) const;
 
-    void checkCollisionY(Entity *collidableEntities, int collisionCheckCount);
+    void checkCollisionY(const std::vector<Entity*>& collidableEntities);
     void checkCollisionY(Map *map);
 
-    void checkCollisionX(Entity *collidableEntities, int collisionCheckCount);
+    void checkCollisionX(const std::vector<Entity*>& collidableEntities);
     void checkCollisionX(Map *map);
 
     void resetColliderFlags()
@@ -103,13 +100,13 @@ public:
         float   deltaTime,
         Entity *player,
         Map    *map,
-        Entity *collidableEntities,
-        int     collisionCheckCount
+        const std::vector<Entity*>& collidableEntities
     );
     void render();
     void normaliseMovement() { Normalise(&mMovement); }
 
     void jump()       { mIsJumping = true;         }
+    void throwPlatform();
     void activate()   { mEntityStatus = ACTIVE;    }
     void deactivate() { mEntityStatus = INACTIVE;  }
     void displayCollider();
@@ -143,16 +140,20 @@ public:
     AIType      getAIType()                const { return mAIType;                }
     AIState     getAIState()               const { return mAIState;               }
 
-    int getHealth() const {return health;}
+    int getLives() const {return lives;}
+    void decreaseLives() {lives--;}
+    bool getAcquired() const {return acquired;}
     bool isCollidingTop()    const { return mIsCollidingTop;    }
     bool isCollidingBottom() const { return mIsCollidingBottom; }
 
     std::map<Direction, std::vector<int>> getAnimationAtlas() const { return mAnimationAtlas; }
 
-    void setHealth(int newHealth) {health = newHealth;}
+    void setLives(int newHealth) {lives = newHealth;}
     void scaleSize() {
-        mScale = {mScale.x * static_cast<float>(health), mScale.y * static_cast<float>(health)};
+        mScale = {mScale.x * static_cast<float>(lives), mScale.y * static_cast<float>(lives)};
     }
+
+    void setAcquired() {acquired = true;}
     void setPosition(Vector2 newPosition)
         { mPosition = newPosition;                 }
     void setMovement(Vector2 newMovement)

@@ -102,3 +102,22 @@ Rectangle getUVRectangle(const Texture2D *texture, int index, int rows, int cols
         sliceHeight // height of slice
     };
 }
+
+/**
+ * @brief Smoothly adjusts the camera's target position towards a specified
+ * target position.
+ *
+ * @param camera A pointer to a `Camera2D` struct.
+ * @param targetPosition A pointer to the position the camera should move
+ * towards.
+ */
+void panCamera(Camera2D *camera, const Vector2 *targetPosition)
+{
+    Vector2 positionDifference = Vector2Subtract(
+        *targetPosition, camera->target
+    );
+
+    camera->target = Vector2Add(
+        camera->target, Vector2Scale(positionDifference, 0.1f)
+    ); // 0.1 = smoothing factor
+}

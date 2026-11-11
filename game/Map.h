@@ -1,7 +1,3 @@
-//
-// Created by xiyou on 11/10/2026.
-//
-
 #ifndef MAP_H
 #define MAP_H
 
@@ -46,6 +42,10 @@ public:
     void render();
     bool isSolidTileAt(Vector2 position, float *xOverlap, float *yOverlap);
 
+    Vector2 getCoords(int row, int col) {
+        return {col * mTileSize + mTileSize/2.0f, row * mTileSize
+        };
+    }
     int           getMapColumns()     const { return mMapColumns;     }
     int           getMapRows()        const { return mMapRows;        }
     float         getTileSize()       const { return mTileSize;       }
