@@ -54,7 +54,7 @@ float GetLength(const Vector2 vector)
  *
  * @param vector Any 2D raylib vector.
  */
-void Normalise(Vector2 *vector)
+void Normalize(Vector2 *vector)
 {
     float magnitude = GetLength(*vector);
 

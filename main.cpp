@@ -15,7 +15,7 @@ AppStatus gAppStatus       = RUNNING;
 float     gPreviousTicks   = 0.0f,
           gTimeAccumulator = 0.0f;
 
-Vector2 gMousePosition = GetMousePosition();
+//Vector2 gMousePosition = GetMousePosition();
 bool placePlatform = false;
 bool absorbPlatform = false;
 
@@ -63,7 +63,7 @@ void processInput()
 {
     gCurrentScene->getState().blob->resetMovement();
 
-    if (!placePlatform) {
+   // if (!placePlatform) {
         if      (IsKeyDown(KEY_A)) gCurrentScene->getState().blob->moveLeft();
         else if (IsKeyDown(KEY_D)) gCurrentScene->getState().blob->moveRight();
 
@@ -73,45 +73,54 @@ void processInput()
         }
         if (!IsKeyDown(KEY_A) && !IsKeyDown(KEY_D) && !IsKeyDown(KEY_W)) gCurrentScene->getState().blob->standStill();
         // to avoid faster diagonal speed
-    }
-    if (IsKeyPressed(KEY_T)) {
-     //   std::cout<<"keyT is pressed!" << std::endl;
-        if (!placePlatform) {
-            placePlatform = true;
+   // }
+   // if (IsKeyPressed(KEY_T)) {
+    //  //   std::cout<<"keyT is pressed!" << std::endl;
+    //     if (!placePlatform) {
+    //         placePlatform = true;
+    //
+    //         gCurrentScene->getState().blob->throwPlatform();
+    //     }
+    //     else placePlatform = false;
+    // }
+    // if (IsKeyPressed(KEY_F)) {
+    //     if (!absorbPlatform) absorbPlatform = true;
+    //     else absorbPlatform = false;
+    // }
 
-        }
-        else placePlatform = false;
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        placePlatform = true;
     }
-    if (IsKeyPressed(KEY_F)) {
-        if (!absorbPlatform) absorbPlatform = true;
-        else absorbPlatform = false;
-    }
-
-    if (placePlatform) {
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            gCurrentScene->getState().blob->throwPlatform();
-            gMousePosition = GetMousePosition();
+    if (placePlatform && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+            Vector2 mousePosition = GetMousePosition();
+            Vector2 blobPosition = gCurrentScene->getState().blob->getPosition();
             Vector2 worldMousePosition = {
-                gMousePosition.x - gCamera.offset.x + gCamera.target.x,
-                gMousePosition.y - gCamera.offset.y + gCamera.target.y
+                mousePosition.x - gCamera.offset.x + gCamera.target.x,
+                mousePosition.y - gCamera.offset.y + gCamera.target.y
             };
+            Vector2 direction = {
+                worldMousePosition.x - blobPosition.x,
+                worldMousePosition.y - blobPosition.y
+            };
+        if (GetLength(direction) > 0.0f) Normalise(&direction);
             if (gCurrentScene->getState().blob->getLives() > 1) {
-             //   std::cout <<"inside mouse click to place platform" << std:: endl;
                 Entity* newPlatform = new Entity{
-                    worldMousePosition,
+                    {blobPosition.x, blobPosition.y - gCurrentScene->getState().blob->getScale().y / 2.0f},
                     {50.0f, 50.0f},
                     "assets/blobPlatform.png",
                     PLATFORM
                 };
-              //  std::cout << "platform position: " << newPlatform->getPosition().x << " " << newPlatform->getPosition().y << " mouse position: " <<
-              //      gMousePosition.x << " " << gMousePosition.y << std::endl;
+                float platformSpeed = 500.0f;
+                newPlatform->setSpeed(platformSpeed);
+                newPlatform->setAcceleration({0.0f, 981.0f});
+                newPlatform->setFlying();
+                newPlatform->setVelocity({direction.x * platformSpeed, direction.y * platformSpeed});
                gCurrentScene->getState().entities.push_back(newPlatform);
 
-                //std::cout<<"platform is placed! " << gCurrentScene->getState().entities.size()<<std::endl;
                 gCurrentScene->getState().blob->decreaseLives();
                 placePlatform = false;
             }
-        }
+        //}
     }
     // if (absorbPlatform) {
     //

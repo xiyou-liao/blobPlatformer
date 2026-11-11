@@ -23,7 +23,7 @@ enum TextureType { SINGLE, ATLAS                        };
 enum SceneID     { NO_SCENE = -1, LEVEL_A, LEVEL_B, LEVEL_C      };
 
 Color     ColorFromHex(const char *hex);
-void      Normalise(Vector2 *vector);
+void      Normalize(Vector2 *vector);
 float     GetLength(const Vector2 vector);
 Rectangle getUVRectangle(const Texture2D *texture, int index, int rows, int cols);
 void      panCamera(Camera2D *camera, const Vector2 *targetPosition);

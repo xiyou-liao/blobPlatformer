@@ -24,6 +24,7 @@ private:
     TextureType mTextureType;
     Vector2     mSpriteSheetDimensions;
 
+    float mHighestY;
     std::map<Direction, std::vector<int>> mAnimationAtlas;
     std::vector<int>                      mAnimationIndices;
     Direction                             mDirection;
@@ -50,6 +51,7 @@ private:
     AIType  mAIType;
     AIState mAIState;
     bool acquired = false;
+    bool isFlying = false;
 
     bool isColliding(Entity *other) const;
 
@@ -103,7 +105,7 @@ public:
         const std::vector<Entity*>& collidableEntities
     );
     void render();
-    void normaliseMovement() { Normalise(&mMovement); }
+    void normaliseMovement() { Normalize(&mMovement); }
 
     void jump()       { mIsJumping = true;         }
     void throwPlatform();
@@ -112,7 +114,10 @@ public:
     void displayCollider();
 
     bool isActive() { return mEntityStatus == ACTIVE; }
-
+    void stopFlying() {
+        mAcceleration = {0.0f, 0.0f};
+        isFlying = false;
+    }
     void moveUp()    { mMovement.y = -1; mDirection = UP;    }
     //void moveDown()  { mMovement.y =  1; mDirection = DOWN;  }
     void moveLeft()  { mMovement.x = -1; mDirection = LEFT;  }
@@ -142,6 +147,10 @@ public:
 
     int getLives() const {return lives;}
     void decreaseLives() {lives--;}
+    void setFlying() {
+        isFlying = true;
+        mHighestY = mPosition.y;
+    }
     bool getAcquired() const {return acquired;}
     bool isCollidingTop()    const { return mIsCollidingTop;    }
     bool isCollidingBottom() const { return mIsCollidingBottom; }
@@ -153,6 +162,11 @@ public:
         mScale = {mScale.x * static_cast<float>(lives), mScale.y * static_cast<float>(lives)};
     }
 
+
+    void setVelocity (Vector2 newVelocity) {
+        mVelocity = newVelocity;
+        mHighestY = mPosition.y;
+    }
     void setAcquired() {acquired = true;}
     void setPosition(Vector2 newPosition)
         { mPosition = newPosition;                 }

@@ -47,7 +47,7 @@ void LevelA::initialise()
     float sizeRatio = 45.0f/60.0f;
 
     mGameState.blob = new Entity(
-        { 100.0f, mOrigin.y }, // position
+        { 50.0f, mOrigin.y }, // position
         { 100.0f * sizeRatio, 100.0f },             // scale
         "assets/blob.png",                     // texture file address
         ATLAS,                                      // single image or atlas?
@@ -59,8 +59,8 @@ void LevelA::initialise()
     mGameState.blob->setLives(6);
     mGameState.blob->setJumpingPower(550.0f);
     mGameState.blob->setColliderDimensions({
-        mGameState.blob->getScale().x / 2.0f,
-        mGameState.blob->getScale().y / 1.75f
+        mGameState.blob->getScale().x / 3.0f,
+        mGameState.blob->getScale().y / 2.5f
     });
     mGameState.blob->setAcceleration({ 0.0f, ACCELERATION_OF_GRAVITY });
 
@@ -85,6 +85,16 @@ void LevelA::update(float deltaTime)
                       // col. entity count
     );
 
+    for (size_t i = 0; i < mGameState.entities.size(); i++) {
+        if (mGameState.entities[i]->getEntityType() == PLATFORM) {
+            std::vector<Entity*> blank;
+            mGameState.entities[i]->update(
+                deltaTime,
+                nullptr,
+                mGameState.map,
+                blank);
+        }
+    }
     // if (mGameState.blob->getPosition().y > END_GAME_THRESHOLD)
     //     mGameState.nextSceneID = LEVEL_B;
 }

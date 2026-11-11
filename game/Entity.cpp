@@ -365,17 +365,38 @@ void Entity::update(
     if (mEntityType == PLAYER) {
         mScale = {100.0f * 45.0f / 60.0f * lives / 2.0f, 100.0f * lives / 2.0f};
         mColliderDimensions = {
-        mScale.x / 2.0f,
-        mScale.y / 1.75f
+        mScale.x / 3.0f,
+        mScale.y / 2.5f
     };
     }
 
     resetColliderFlags();
 
-    mVelocity.x = mMovement.x * mSpeed;
+    if (mEntityType == PLATFORM && isFlying) {
+        mVelocity.x += mAcceleration.x * deltaTime;
+        mVelocity.y += mAcceleration.y * deltaTime;
+        mPosition.y += mVelocity.y * deltaTime;
+      //  checkCollisionY(collidableEntities);
 
-    mVelocity.x += mAcceleration.x * deltaTime;
-    mVelocity.y += mAcceleration.y * deltaTime;
+        mPosition.x += mVelocity.x * deltaTime;
+      //  checkCollisionX(collidableEntities);
+
+        int maxFallDistance = 150.0f;
+       // float highestY = mPosition.y;
+        if (mPosition.y < mHighestY) {
+            mHighestY = mPosition.y;
+        }
+        if (mPosition.y - mHighestY >= maxFallDistance) {
+            mPosition.y = mHighestY + maxFallDistance;
+            stopFlying();
+        }
+    }
+    else if (mEntityType != PLATFORM) {
+        mVelocity.x = mMovement.x * mSpeed;
+
+        mVelocity.x += mAcceleration.x * deltaTime;
+        mVelocity.y += mAcceleration.y * deltaTime;
+    }
 
     //if (mEntityType == PLAYER) scaleSize();
     // ––––– JUMPING ––––– //
@@ -388,18 +409,21 @@ void Entity::update(
         mVelocity.y -= mJumpingPower;
     }
 
-    mPosition.y += mVelocity.y * deltaTime;
-    checkCollisionY(collidableEntities);
-    checkCollisionY(map);
+    if (mEntityType != PLATFORM) {
+        mPosition.y += mVelocity.y * deltaTime;
+        checkCollisionY(collidableEntities);
+        checkCollisionY(map);
 
-    mPosition.x += mVelocity.x * deltaTime;
-    checkCollisionX(collidableEntities);
-    checkCollisionX(map);
+        mPosition.x += mVelocity.x * deltaTime;
+        checkCollisionX(collidableEntities);
+        checkCollisionX(map);
 
-    // Only animate if we're on the ground (not necessary)
-    if (mTextureType == ATLAS && GetLength(mMovement) != 0 &&
-        mIsCollidingBottom)
-        animate(deltaTime);
+        // Only animate if we're on the ground (not necessary)
+        if (mTextureType == ATLAS && GetLength(mMovement) != 0 &&
+            mIsCollidingBottom)
+            animate(deltaTime);
+    }
+
 }
 
 void Entity::render()
