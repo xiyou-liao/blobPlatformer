@@ -96,9 +96,13 @@ void LevelC::shutdown()
     mGameState.jumpSound = {};
 }
 void LevelC::reset() {
+    int remainingLives = mGameState.lives;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
         delete mGameState.entities[i];
     }
+    delete mGameState.blob;
     mGameState.entities.clear();
+    delete mGameState.map;
     initialize();
+    mGameState.lives = remainingLives;
 }

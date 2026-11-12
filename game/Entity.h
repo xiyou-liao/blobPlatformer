@@ -6,7 +6,7 @@
 enum Direction    { LEFT, UP, RIGHT, STILL, THROW, HURT              }; // For walking
 enum EntityStatus { ACTIVE, INACTIVE                   };
 enum EntityType   { PLAYER, BLOCK, PLATFORM, NPC, NONE, KEY, DOOR };
-enum AIType       { WANDERER, FOLLOWER                 };
+enum AIType       { WANDERER, FOLLOWER, LERPER, JUMPER                 };
 enum AIState      { WALKING, IDLE, FOLLOWING           };
 
 class Entity
@@ -30,15 +30,16 @@ private:
     Direction                             mDirection;
     int                                   mFrameSpeed;
 
-    int lives = 0;
+    int mass = 0;
     int   mCurrentFrameIndex = 0;
     float mAnimationTime     = 0.0f;
-
+    float mDamageCooldown = 0.0f;
     bool  mIsJumping    = false;
     float mJumpingPower = 0.0f;
 
     int   mSpeed;
     float mAngle;
+    float mLerpFactor = 2.0f;
 
     bool mIsCollidingTop    = false;
     bool mIsCollidingBottom = false;
@@ -53,7 +54,7 @@ private:
     bool acquired = false;
     bool isFlying = false;
     bool exitReached = false;
-
+    bool mTakingDamage = false;
     bool isColliding(Entity *other) const;
 
     void checkCollisionY(const std::vector<Entity*>& collidableEntities);
@@ -71,10 +72,11 @@ private:
     }
 
     void animate(float deltaTime);
-    void AIActivate(Entity *target);
+    void AIActivate(Entity *target, float deltaTime);
     void AIWander();
     void AIFollow(Entity *target);
-
+    void AILerp(Entity* target, float deltaTime);
+    // void AIJump();
 public:
     static constexpr int   DEFAULT_SIZE          = 250;
     static constexpr int   DEFAULT_SPEED         = 200;
@@ -114,6 +116,7 @@ public:
     void deactivate() { mEntityStatus = INACTIVE;  }
     void displayCollider();
 
+    bool takeDamage();
     bool isActive() { return mEntityStatus == ACTIVE; }
     void stopFlying() {
         mAcceleration = {0.0f, 0.0f};
@@ -146,26 +149,26 @@ public:
     AIType      getAIType()                const { return mAIType;                }
     AIState     getAIState()               const { return mAIState;               }
 
-    int getLives() const {return lives;}
-    void decreaseLives() {lives--;}
+    int getMass() const {return mass;}
+    void decreaseMass() {mass--;}
     void setFlying() {
         isFlying = true;
         mHighestY = mPosition.y;
     }
     bool getAcquired() const {return acquired;}
     bool getExitReached() const {return exitReached;}
-
+    bool isTakingDamage() const {return mTakingDamage;}
 
     bool isCollidingTop()    const { return mIsCollidingTop;    }
     bool isCollidingBottom() const { return mIsCollidingBottom; }
 
     std::map<Direction, std::vector<int>> getAnimationAtlas() const { return mAnimationAtlas; }
 
-    void setLives(int newHealth) {lives = newHealth;}
+    void setMass(int newMass) {mass = newMass;}
     void scaleSize() {
-        mScale = {mScale.x * static_cast<float>(lives), mScale.y * static_cast<float>(lives)};
+        mScale = {mScale.x * static_cast<float>(mass), mScale.y * static_cast<float>(mass)};
     }
-
+    void setTakingDamage(bool change) {mTakingDamage = change;}
 
     void setVelocity (Vector2 newVelocity) {
         mVelocity = newVelocity;

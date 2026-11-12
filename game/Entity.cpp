@@ -91,6 +91,9 @@ void Entity::checkCollisionY(
                 mIsCollidingBottom  = true;
                 if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
                 if (collidableEntity->getEntityType() == DOOR) exitReached = true;
+                if (collidableEntity->getEntityType() == NPC) {
+                    if (takeDamage()) mTakingDamage = true;
+                }
             }
             else if (mVelocity.y < 0)
             {
@@ -99,6 +102,9 @@ void Entity::checkCollisionY(
                 mIsCollidingTop  = true;
                 if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
                 if (collidableEntity->getEntityType() == DOOR) exitReached = true;
+                if (collidableEntity->getEntityType() == NPC) {
+                    if (takeDamage()) mTakingDamage = true;
+                }
             }
         }
     }
@@ -144,6 +150,9 @@ void Entity::checkCollisionX(
                 mIsCollidingRight = true;
                 if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
                 if (collidableEntity->getEntityType() == DOOR) exitReached = true;
+                if (collidableEntity->getEntityType() == NPC) {
+                    if (takeDamage()) mTakingDamage = true;
+                }
             }
             else if (mVelocity.x < 0)
             {
@@ -154,6 +163,9 @@ void Entity::checkCollisionX(
                 mIsCollidingLeft = true;
                 if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
                 if (collidableEntity->getEntityType() == DOOR) exitReached = true;
+                if (collidableEntity->getEntityType() == NPC) {
+                    if (takeDamage()) mTakingDamage = true;
+                }
             }
         }
     }
@@ -217,6 +229,9 @@ void Entity::checkCollisionY(Map *map)
         if (mEntityType == PLATFORM) {
             setAcceleration({0.0f, 0.0f});
             setVelocity({0.0f, 0.0f});
+        }
+        if (mEntityType == NPC && mAIType == JUMPER) {
+            setVelocity({0.0f, -mJumpingPower});
         }
     }
 }
@@ -292,7 +307,8 @@ bool Entity::isColliding(Entity *other) const
  */
 void Entity::animate(float deltaTime)
 {
-    mAnimationIndices = mAnimationAtlas.at(mDirection);
+    if (mTakingDamage) mAnimationIndices = mAnimationAtlas.at(HURT);
+    else mAnimationIndices = mAnimationAtlas.at(mDirection);
 
 
     mAnimationTime += deltaTime;
@@ -301,15 +317,29 @@ void Entity::animate(float deltaTime)
     if (mAnimationTime >= secondsPerFrame)
     {
         mAnimationTime = 0.0f;
-
         mCurrentFrameIndex++;
-        mCurrentFrameIndex %= mAnimationIndices.size();
+        if (mTakingDamage) {
+            // Play damage animation only once
+            if (mCurrentFrameIndex >= mAnimationIndices.size()) {
+                mTakingDamage = false;
+                mCurrentFrameIndex = 0;
+            }
+        }
+        else{mCurrentFrameIndex %= mAnimationIndices.size();}
     }
 }
 
 void Entity::throwPlatform() {
     mDirection = THROW;
+}
+bool Entity::takeDamage()
+{
+     if (mDamageCooldown > 0.0f) return false;
 
+    mCurrentFrameIndex = 0;
+    mAnimationTime = 0.0f;
+    mDamageCooldown = 1.0f;
+    return true;
 }
 void Entity::displayCollider()
 {
@@ -358,7 +388,34 @@ void Entity::AIFollow(Entity *target)
     }
 }
 
-void Entity::AIActivate(Entity *target)
+void Entity::AILerp(Entity *target, float deltaTime)
+{
+
+    //position' = position + (target position - position) * lerp factor * delta time
+    switch (mAIState) {
+        case IDLE:
+            if (Vector2Distance(mPosition, target->getPosition()) < 350.0f)
+                mAIState = FOLLOWING;
+            break;
+        case FOLLOWING:
+            mPosition = mPosition + (target->getPosition() - mPosition) * mLerpFactor * deltaTime;
+    }
+}
+
+// void Entity::AIJump() {
+//     if (mIsJumping)
+//     {
+//         // STEP 1: Immediately return the flag to its original false state
+//         mIsJumping = false;
+//
+//         // STEP 2: The player now acquires an upward velocity
+//         mVelocity.y = -mJumpingPower;
+//     }
+//     else if (mIsJumping == false && mVelocity.y == 0.0f) mIsJumping = true;
+// }
+
+
+void Entity::AIActivate(Entity *target, float deltaTime)
 {
     switch (mAIType)
     {
@@ -368,10 +425,17 @@ void Entity::AIActivate(Entity *target)
     case FOLLOWER:
         AIFollow(target);
         break;
+    case LERPER:
+        AILerp(target, deltaTime);
+        break;
+    // case JUMPER:
+    //     AIJump();
+    //     break;
     default:
         break;
     }
 }
+
 
 void Entity::update(
     float   deltaTime,
@@ -382,10 +446,10 @@ void Entity::update(
 {
     if (mEntityStatus == INACTIVE) return;
 
-    if (mEntityType == NPC) AIActivate(player);
+    if (mEntityType == NPC && mAIType != JUMPER) AIActivate(player, deltaTime);
 
     if (mEntityType == PLAYER) {
-        mScale = {100.0f * 45.0f / 60.0f * lives / 2.0f, 100.0f * lives / 2.0f};
+        mScale = {100.0f * 45.0f / 60.0f * mass / 2.0f, 100.0f * mass / 2.0f};
         mColliderDimensions = {
         mScale.x / 3.0f,
         mScale.y / 2.5f
@@ -416,7 +480,7 @@ void Entity::update(
     // if (mEntityType == KEY && acquired) {
     //     mPosition = {player->getPosition().x, player->getPosition().y - player->getColliderDimensions().y / 2.0f};
     // }
-    if (mEntityType != PLATFORM && mEntityType != KEY) {
+    if (mEntityType != PLATFORM && mEntityType != KEY ) {
         mVelocity.x = mMovement.x * mSpeed;
         mVelocity.x += mAcceleration.x * deltaTime;
         mVelocity.y += mAcceleration.y * deltaTime;
@@ -441,11 +505,14 @@ void Entity::update(
         mPosition.x += mVelocity.x * deltaTime;
         checkCollisionX(collidableEntities);
         checkCollisionX(map);
-
+    }
         // Only animate if we're on the ground (not necessary)
-        if (mTextureType == ATLAS && GetLength(mMovement) != 0 &&
-            mIsCollidingBottom)
-            animate(deltaTime);
+    if (mTextureType == ATLAS && GetLength(mMovement) != 0 &&
+        mIsCollidingBottom)
+        animate(deltaTime);
+
+    if (mDamageCooldown > 0.0f) {
+        mDamageCooldown -= deltaTime;
     }
 
 }

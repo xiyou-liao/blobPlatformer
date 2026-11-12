@@ -14,6 +14,7 @@ constexpr float FIXED_TIMESTEP = 1.0f / 60.0f;
 AppStatus gAppStatus       = RUNNING;
 float     gPreviousTicks   = 0.0f,
           gTimeAccumulator = 0.0f;
+int lives = 5;
 
 //Vector2 gMousePosition = GetMousePosition();
 bool placePlatform = false;
@@ -90,7 +91,7 @@ void processInput()
             worldMousePosition.y - blobPosition.y
         };
     if (GetLength(direction) > 0.0f) Normalize(&direction);
-        if (gCurrentScene->getState().blob->getLives() > 1) {
+        if (gCurrentScene->getState().blob->getMass() > 1) {
             Entity* newPlatform = new Entity{
                 {blobPosition.x, blobPosition.y - gCurrentScene->getState().blob->getColliderDimensions().y },
                 {50.0f, 50.0f},
@@ -104,7 +105,7 @@ void processInput()
             newPlatform->setVelocity({direction.x * platformSpeed, direction.y * platformSpeed});
             gCurrentScene->getState().entities.push_back(newPlatform);
 
-            gCurrentScene->getState().blob->decreaseLives();
+            gCurrentScene->getState().blob->decreaseMass();
             placePlatform = false;
         }
     }

@@ -1,7 +1,3 @@
-//
-// Created by xiyou on 11/10/2026.
-//
-
 #ifndef SCENE_H
 #define SCENE_H
 
@@ -12,6 +8,8 @@ struct GameState
     Entity *blob;
     Map    *map;
     std::vector<Entity*> entities;
+
+    int lives = 5;
 
     Music bgm;
     Sound jumpSound;
@@ -27,7 +25,7 @@ protected:
     const char *mBGColourHexCode = "#000000";
     bool isKeyAcquired = false;
     bool reachedDoor = false;
-    Vector2 mSpawnPoint;
+ //   Vector2 mSpawnPoint;
 public:
     Scene();
     Scene(Vector2 origin, const char *bgHexCode);
@@ -41,8 +39,6 @@ public:
 
     GameState&   getState()          { return mGameState;        }
     Vector2     getOrigin()          const { return mOrigin;           }
-    Vector2 getSpawnPoint() const {return mSpawnPoint;}
-    void setSpawnPoint(Vector2 spawn) {mSpawnPoint = spawn;}
 
     bool getIsKeyAcquired() const {return isKeyAcquired;}
     const char *getBGColourHexCode() const { return mBGColourHexCode; }

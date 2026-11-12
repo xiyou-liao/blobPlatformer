@@ -56,7 +56,7 @@ void LevelB::initialize()
         PLAYER                                      // entity type
     );
 
-    mGameState.blob->setLives(6);
+    mGameState.blob->setMass(6);
     mGameState.blob->setJumpingPower(550.0f);
     mGameState.blob->setColliderDimensions({
         mGameState.blob->getScale().x / 3.0f,
@@ -138,9 +138,13 @@ void LevelB::shutdown()
     mGameState.jumpSound = {};
 }
 void LevelB::reset() {
+    int remainingLives = mGameState.lives;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
         delete mGameState.entities[i];
     }
+    delete mGameState.blob;
     mGameState.entities.clear();
+    delete mGameState.map;
     initialize();
+    mGameState.lives = remainingLives;
 }
