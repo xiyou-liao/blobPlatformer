@@ -45,16 +45,15 @@ void LevelB::initialize() {
 
     float sizeRatio = 45.0f/60.0f;
 
-    Vector2 spawn = {mGameState.map->getLeftBoundary(), mGameState.map->getTopBoundary()};
-    //  mSpawnPoint = spawn;
+
     mGameState.blob = new Entity(
-        spawn, // position
-        { 100.0f * sizeRatio, 100.0f },             // scale
-        "assets/blob.png",                     // texture file address
-        ATLAS,                                      // single image or atlas?
-        { 5, 6 },                                   // atlas dimensions
-        blobAnimationAtlas,                      // actual atlas
-        PLAYER                                      // entity type
+    mGameState.map->getCoords(8, 4),
+        { 100.0f * sizeRatio, 100.0f },
+        "assets/blob.png",
+        ATLAS,
+        { 5, 6 },
+        blobAnimationAtlas,
+        PLAYER
     );
 
     mGameState.blob->setMass(6);
@@ -72,7 +71,7 @@ void LevelB::initialize() {
         KEY
     };
     Entity* door = new Entity{
-            mGameState.map->getCoords(9, 38),
+            mGameState.map->getCoords(10, 38),
             {75.0f, 75.0f},
             "assets/door.png",
             DOOR
@@ -109,13 +108,14 @@ void LevelB::initialize() {
             sheep->getScale().y
         });
         sheep->setJumpingPower(800.0f);
+        sheep->setDirection(LEFT);
         sheep->setAcceleration({ 0.0f, ACCELERATION_OF_GRAVITY });
         mGameState.entities.push_back(sheep);
 
     }
 
     Entity* rat = new Entity(
-        mGameState.map->getCoords(6, 19), // position
+        mGameState.map->getCoords(11, 34), // position
         { 75.0f, 75.0f },                       // scale
         "assets/rat.png",                  // texture file address
         NPC                                      // entity type
@@ -129,9 +129,19 @@ void LevelB::initialize() {
         rat->getScale().x / 2.0f,
         rat->getScale().y
     });
-    //ratsheep->setJumpingPower(600.0f);
+
     rat->setAcceleration({ 0.0f, ACCELERATION_OF_GRAVITY });
     mGameState.entities.push_back(rat);
+
+    for (int i = 0; i<5; i++) {
+        Entity* spike = new Entity(
+       mGameState.map->getCoords(10, 19+i),
+       { 75.0f, 75.0f },
+       "assets/spike.png",
+       NPC
+        );
+        mGameState.entities.push_back(spike);
+    }
 }
 
 void LevelB::update(float deltaTime)
@@ -152,7 +162,7 @@ void LevelB::update(float deltaTime)
     }
     if (mGameState.blob->getPosition().y > 1200.0f) {
         mGameState.lives--;
-        reset();
+        respawn();
     }
     for (size_t i = 0; i < mGameState.entities.size(); i++) {
         if (mGameState.entities[i] == nullptr) continue;
@@ -173,8 +183,10 @@ void LevelB::update(float deltaTime)
     }
     if (mGameState.blob->getExitReached()) reachedDoor = true;
     if (isKeyAcquired && reachedDoor)
-        mGameState.nextSceneID = LEVEL_B;
-    if (mGameState.lives == 0) std::cout<<"You lose!"<<std::endl;
+        mGameState.nextSceneID = WIN;
+    if (mGameState.lives == 0) {
+        mGameState.nextSceneID = LOSE;
+    }
 }
 
 void LevelB::render()
@@ -202,7 +214,7 @@ void LevelB::shutdown()
     mGameState.jumpSound = {};
 }
 
-void LevelB::reset() {
+void LevelB::respawn() {
     int remainingLives = mGameState.lives;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
         delete mGameState.entities[i];
@@ -211,5 +223,16 @@ void LevelB::reset() {
     mGameState.entities.clear();
     delete mGameState.map;
     initialize();
+    mGameState.lives = remainingLives;
+}
+
+void LevelB::restart() {
+    int remainingLives = mGameState.lives;
+    for (size_t i = 0; i<mGameState.entities.size(); i++) {
+        delete mGameState.entities[i];
+    }
+    delete mGameState.blob;
+    mGameState.entities.clear();
+    delete mGameState.map;
     mGameState.lives = remainingLives;
 }

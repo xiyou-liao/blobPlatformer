@@ -510,7 +510,7 @@ void Entity::update(
         mPosition.x += mVelocity.x * deltaTime;
         checkCollisionX(collidableEntities);
         checkCollisionX(map);
-        int maxFallDistance = 150.0f;
+        int maxFallDistance = 100.0f;
        // float highestY = mPosition.y;
         if (mPosition.y < mHighestY) {
             mHighestY = mPosition.y;
@@ -520,9 +520,6 @@ void Entity::update(
             stopFlying();
         }
     }
-    // if (mEntityType == KEY && acquired) {
-    //     mPosition = {player->getPosition().x, player->getPosition().y - player->getColliderDimensions().y / 2.0f};
-    // }
     if (mEntityType != PLATFORM && mEntityType != KEY && mAIType != FLYER) {
         mVelocity.x = mMovement.x * mSpeed;
         mVelocity.x += mAcceleration.x * deltaTime;
@@ -620,6 +617,7 @@ void Entity::render()
     // Render the texture on screen
     if (mEntityType == NPC) {
         if (mDirection == RIGHT) textureArea.width *= -1.0f;
+        if (mDirection == DOWN && textureArea.height > 0.0f) textureArea.height *= -1.0f;
     }
     DrawTexturePro(
         mTexture,

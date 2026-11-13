@@ -81,11 +81,6 @@ void LevelA::initialize()
     mGameState.entities.push_back(key);
     mGameState.entities.push_back(door);
 
-    // std::map<Direction, std::vector<int>> sheepAnimationAtlas = {
-    //     { RIGHT,  { 0, 1, 2, 3, 4, 5, 6, 7 } },
-    //     { LEFT, { 8, 9, 10, 11, 12, 13, 14, 15 } },
-    // };
-
     // @see dyru.itch.io/pixel-ghost-template
     Entity* sheep = new Entity(
         mGameState.map->getCoords(9, 10), // position
@@ -96,6 +91,7 @@ void LevelA::initialize()
 
     sheep->setAIType(JUMPER);
     sheep->setAIState(IDLE);
+    sheep->setDirection(LEFT);
     sheep->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
     sheep->setVelocity({0.0f, -500.0f});
     sheep->setColliderDimensions({
@@ -124,6 +120,15 @@ void LevelA::initialize()
 
     rat->setAcceleration({ 0.0f, ACCELERATION_OF_GRAVITY });
     mGameState.entities.push_back(rat);
+
+    Entity* spike = new Entity(
+        mGameState.map->getCoords(13, 22),
+        { 75.0f, 75.0f },
+        "assets/spike.png",
+        NPC
+    );
+    spike->setDirection(DOWN);
+    mGameState.entities.push_back(spike);
 }
 
 void LevelA::update(float deltaTime)
@@ -144,7 +149,7 @@ void LevelA::update(float deltaTime)
     }
     if (mGameState.blob->getPosition().y > 1200.0f) {
         mGameState.lives--;
-        reset();
+        respawn();
     }
     for (size_t i = 0; i < mGameState.entities.size(); i++) {
         if (mGameState.entities[i] == nullptr) continue;
@@ -166,7 +171,9 @@ void LevelA::update(float deltaTime)
     if (mGameState.blob->getExitReached()) reachedDoor = true;
     if (isKeyAcquired && reachedDoor)
         mGameState.nextSceneID = LEVEL_B;
-    if (mGameState.lives == 0) std::cout<<"You lose!"<<std::endl;
+    if (mGameState.lives == 0) {
+        mGameState.nextSceneID = LOSE;
+    }
 }
 
 void LevelA::render()
@@ -194,7 +201,7 @@ void LevelA::shutdown()
     mGameState.jumpSound = {};
 }
 
-void LevelA::reset() {
+void LevelA::respawn() {
     int remainingLives = mGameState.lives;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
         delete mGameState.entities[i];
@@ -203,5 +210,16 @@ void LevelA::reset() {
     mGameState.entities.clear();
     delete mGameState.map;
     initialize();
+    mGameState.lives = remainingLives;
+}
+
+void LevelA::restart() {
+    int remainingLives = mGameState.lives;
+    for (size_t i = 0; i<mGameState.entities.size(); i++) {
+        delete mGameState.entities[i];
+    }
+    delete mGameState.blob;
+    mGameState.entities.clear();
+    delete mGameState.map;
     mGameState.lives = remainingLives;
 }

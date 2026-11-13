@@ -5,8 +5,8 @@
 
 struct GameState
 {
-    Entity *blob;
-    Map    *map;
+    Entity *blob = nullptr;
+    Map    *map = nullptr;
     std::vector<Entity*> entities;
 
     int lives = 5;
@@ -14,7 +14,7 @@ struct GameState
     Music bgm;
     Sound jumpSound;
 
-    SceneID nextSceneID;
+    SceneID nextSceneID = NO_SCENE;
 };
 
 class Scene
@@ -35,7 +35,8 @@ public:
     virtual void update(float deltaTime) = 0;
     virtual void render() = 0;
     virtual void shutdown() = 0;
-    virtual void reset() = 0;
+    virtual void respawn() = 0;
+    virtual void restart() = 0;
 
     GameState&   getState()          { return mGameState;        }
     Vector2     getOrigin()          const { return mOrigin;           }

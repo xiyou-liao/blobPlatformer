@@ -38,6 +38,8 @@ public:
     void update(float deltaTime) override;
     void render() override;
     void shutdown() override;
-    void reset() override;
+    void respawn() override;
+    void restart() override;
+
 };
 #endif //LEVELC_H

@@ -138,7 +138,7 @@ void LevelT::update(float deltaTime)
     }
     if (mGameState.blob->getPosition().y > 1200.0f) {
         mGameState.lives--;
-        reset();
+        respawn();
     }
     for (size_t i = 0; i < mGameState.entities.size(); i++) {
         if (mGameState.entities[i] == nullptr) continue;
@@ -160,7 +160,9 @@ void LevelT::update(float deltaTime)
     if (mGameState.blob->getExitReached()) reachedDoor = true;
     if (isKeyAcquired && reachedDoor)
         mGameState.nextSceneID = LEVEL_A;
-    if (mGameState.lives == 0) std::cout<<"You lose!"<<std::endl;
+    if (mGameState.lives == 0) {
+        mGameState.nextSceneID = LOSE;
+    }
 }
 
 void LevelT::render()
@@ -212,7 +214,7 @@ void LevelT::shutdown()
     mGameState.jumpSound = {};
 }
 
-void LevelT::reset() {
+void LevelT::respawn() {
     int remainingLives = mGameState.lives;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
         delete mGameState.entities[i];
@@ -221,5 +223,16 @@ void LevelT::reset() {
     mGameState.entities.clear();
     delete mGameState.map;
     initialize();
+    mGameState.lives = remainingLives;
+}
+
+void LevelT::restart() {
+    int remainingLives = mGameState.lives;
+    for (size_t i = 0; i<mGameState.entities.size(); i++) {
+        delete mGameState.entities[i];
+    }
+    delete mGameState.blob;
+    mGameState.entities.clear();
+    delete mGameState.map;
     mGameState.lives = remainingLives;
 }
