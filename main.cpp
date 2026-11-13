@@ -1,8 +1,8 @@
-#include "game/LevelC.h"
+#include "game/LevelT.h"
 
 // Global Constants
 constexpr int SCREEN_WIDTH  = 1500,
-              SCREEN_HEIGHT = 800,
+              SCREEN_HEIGHT = 1000,
               FPS           = 120;
 
 constexpr Vector2 ORIGIN           = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
@@ -14,7 +14,7 @@ constexpr float FIXED_TIMESTEP = 1.0f / 60.0f;
 AppStatus gAppStatus       = RUNNING;
 float     gPreviousTicks   = 0.0f,
           gTimeAccumulator = 0.0f;
-int lives = 5;
+//int lives = 5;
 
 //Vector2 gMousePosition = GetMousePosition();
 bool placePlatform = false;
@@ -37,20 +37,25 @@ void panCamera(Camera2D *camera, const Vector2 *targetPosition);
 
 void switchToScene(Scene *scene)
 {
-    if (gCurrentScene) gCurrentScene->shutdown();
+    int currentLives = 5;
+    if (gCurrentScene) {
+        currentLives = gCurrentScene->getState().lives;
+        gCurrentScene->shutdown();
+    }
     gCurrentScene = scene;
+    gCurrentScene->getState().lives = currentLives;
     gCurrentScene->initialize();
     gCamera.target = gCurrentScene->getState().blob->getPosition();
 }
 
-void initialise() {
+void initialize() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Blob Platformer");
 
     gLevels[LEVEL_A] = new LevelA(ORIGIN, "#3A5A40");
     gLevels[LEVEL_B] = new LevelB(ORIGIN, "#DAD7CD");
-    gLevels[LEVEL_C] = new LevelC(ORIGIN, "DAD7CD");
+    gLevels[LEVEL_T] = new LevelT(ORIGIN, "DAD7CD");
 
-    switchToScene(gLevels[LEVEL_A]);
+    switchToScene(gLevels[LEVEL_T]);
 
     gCamera.offset   = ORIGIN;
     gCamera.rotation = 0.0f;
@@ -90,7 +95,8 @@ void processInput()
             worldMousePosition.x - blobPosition.x,
             worldMousePosition.y - blobPosition.y
         };
-    if (GetLength(direction) > 0.0f) Normalize(&direction);
+  //  if (GetLength(direction) > 0.0f)
+        Normalize(&direction);
         if (gCurrentScene->getState().blob->getMass() > 1) {
             Entity* newPlatform = new Entity{
                 {blobPosition.x, blobPosition.y - gCurrentScene->getState().blob->getColliderDimensions().y },
@@ -115,6 +121,10 @@ void processInput()
         gCurrentScene->getState().blob->normalizeMovement();
 
     if (IsKeyPressed(KEY_Q) || WindowShouldClose()) gAppStatus = TERMINATED;
+    if (IsKeyPressed(KEY_ONE)) switchToScene(gLevels[LEVEL_T]);
+    if (IsKeyPressed(KEY_TWO)) switchToScene(gLevels[LEVEL_A]);
+    if (IsKeyPressed(KEY_THREE)) switchToScene(gLevels[LEVEL_B]);
+
 }
 
 void update()
@@ -173,7 +183,7 @@ void shutdown()
 
 int main(void)
 {
-    initialise();
+    initialize();
 
     while (gAppStatus == RUNNING)
     {
@@ -182,8 +192,10 @@ int main(void)
 
         if (gCurrentScene->getState().nextSceneID != NO_SCENE)
         {
+       //     int currentLives = gCurrentScene->getState().lives;
             SceneID id = gCurrentScene->getState().nextSceneID;
             switchToScene(gLevels[id]);
+       //     gCurrentScene->getState().lives = currentLives;
         }
 
         render();

@@ -3,10 +3,10 @@
 
 #include "Map.h"
 
-enum Direction    { LEFT, UP, RIGHT, STILL, THROW, HURT              }; // For walking
+enum Direction    { LEFT, UP, RIGHT, STILL, THROW, HURT, DOWN              }; // For walking
 enum EntityStatus { ACTIVE, INACTIVE                   };
 enum EntityType   { PLAYER, BLOCK, PLATFORM, NPC, NONE, KEY, DOOR };
-enum AIType       { WANDERER, FOLLOWER, LERPER, JUMPER                 };
+enum AIType       { WANDERER, FOLLOWER, LERPER, JUMPER, FLYER };
 enum AIState      { WALKING, IDLE, FOLLOWING           };
 
 class Entity
@@ -25,6 +25,8 @@ private:
     Vector2     mSpriteSheetDimensions;
 
     float mHighestY;
+    std::pair<Vector2, Vector2> mFlyBoundaries;
+
     std::map<Direction, std::vector<int>> mAnimationAtlas;
     std::vector<int>                      mAnimationIndices;
     Direction                             mDirection;
@@ -76,7 +78,7 @@ private:
     void AIWander();
     void AIFollow(Entity *target);
     void AILerp(Entity* target, float deltaTime);
-    // void AIJump();
+     void AIFly(float deltaTime);
 public:
     static constexpr int   DEFAULT_SIZE          = 250;
     static constexpr int   DEFAULT_SPEED         = 200;
@@ -155,7 +157,9 @@ public:
         isFlying = true;
         mHighestY = mPosition.y;
     }
-    bool getAcquired() const {return acquired;}
+    bool getAcquired() const {
+        return acquired;
+    }
     bool getExitReached() const {return exitReached;}
     bool isTakingDamage() const {return mTakingDamage;}
 
@@ -174,7 +178,11 @@ public:
         mVelocity = newVelocity;
         mHighestY = mPosition.y;
     }
-    void setAcquired() {acquired = true;}
+    void setAcquired() {
+        acquired = true;
+        //mEntityStatus = INACTIVE;
+    }
+    void setFlyBoundaries(std::pair<Vector2, Vector2> boundaries){mFlyBoundaries = boundaries;}
     void setPosition(Vector2 newPosition)
         { mPosition = newPosition;                 }
     void setMovement(Vector2 newMovement)

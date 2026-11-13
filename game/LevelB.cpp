@@ -10,15 +10,14 @@ LevelB::LevelB(Vector2 origin, const char *bgHexCode)
 
 LevelB::~LevelB() { shutdown(); }
 
-void LevelB::initialize()
-{
+void LevelB::initialize() {
     mGameState.nextSceneID = NO_SCENE;
 
     //mGameState.bgm = LoadMusicStream("assets/game/04 - Silent Forest.wav");
     SetMusicVolume(mGameState.bgm, 0.33f);
     PlayMusicStream(mGameState.bgm);
 
-   // mGameState.jumpSound = LoadSound("assets/game/Dirt Jump.wav");
+    // mGameState.jumpSound = LoadSound("assets/game/Dirt Jump.wav");
 
     /*
         ----------- MAP -----------
@@ -46,8 +45,10 @@ void LevelB::initialize()
 
     float sizeRatio = 45.0f/60.0f;
 
+    Vector2 spawn = {mGameState.map->getLeftBoundary(), mGameState.map->getTopBoundary()};
+    //  mSpawnPoint = spawn;
     mGameState.blob = new Entity(
-        {mGameState.map->getLeftBoundary(), mGameState.map->getTopBoundary()}, // position
+        spawn, // position
         { 100.0f * sizeRatio, 100.0f },             // scale
         "assets/blob.png",                     // texture file address
         ATLAS,                                      // single image or atlas?
@@ -57,31 +58,85 @@ void LevelB::initialize()
     );
 
     mGameState.blob->setMass(6);
-    mGameState.blob->setJumpingPower(550.0f);
+    mGameState.blob->setJumpingPower(600.0f);
     mGameState.blob->setColliderDimensions({
         mGameState.blob->getScale().x / 3.0f,
         mGameState.blob->getScale().y / 2.5f
     });
     mGameState.blob->setAcceleration({ 0.0f, ACCELERATION_OF_GRAVITY });
 
-    Entity* flowers = new Entity{
-        mGameState.map->getCoords(5, 21),
+    Entity* key = new Entity{
+        mGameState.map->getCoords(6, 29),
         {100.0f, 100.0f},
-        "assets/flowers.png",
+        "assets/key.png",
         KEY
     };
     Entity* door = new Entity{
-        {mGameState.map->getCoords(8, 38)},
-        {500.0f, 500.0f},
-        "assets/door.png",
-        DOOR
-    };
-    mGameState.entities.push_back(flowers);
+            mGameState.map->getCoords(9, 38),
+            {75.0f, 75.0f},
+            "assets/door.png",
+            DOOR
+        };
+    mGameState.entities.push_back(key);
     mGameState.entities.push_back(door);
+
+    Entity* helicopter = new Entity(
+        mGameState.map->getCoords(5, 40),
+        {100.0f, 100.0f},
+        "assets/helicopter.png",
+        NPC
+    );
+    helicopter->setSpeed(350.0f);
+    helicopter->setAIType(FLYER);
+    helicopter->setDirection(LEFT);
+    helicopter->setFlyBoundaries({mGameState.map->getCoords(5, 16), mGameState.map->getCoords(5, 40)});
+    mGameState.entities.push_back(helicopter);
+
+    for (int i = 0; i<4; i++) {
+        Entity* sheep = new Entity(
+        mGameState.map->getCoords(9, 10+i), // position
+        { 75.0f, 75.0f },                       // scale
+        "assets/sheep.png",                  // texture file address
+        NPC                                      // entity type
+    );
+
+        sheep->setAIType(JUMPER);
+        sheep->setAIState(IDLE);
+        sheep->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
+        sheep->setVelocity({0.0f, -500.0f * i / 2.0f});
+        sheep->setColliderDimensions({
+            sheep->getScale().x / 2.0f,
+            sheep->getScale().y
+        });
+        sheep->setJumpingPower(800.0f);
+        sheep->setAcceleration({ 0.0f, ACCELERATION_OF_GRAVITY });
+        mGameState.entities.push_back(sheep);
+
+    }
+
+    Entity* rat = new Entity(
+        mGameState.map->getCoords(6, 19), // position
+        { 75.0f, 75.0f },                       // scale
+        "assets/rat.png",                  // texture file address
+        NPC                                      // entity type
+    );
+
+    rat->setAIType(LERPER);
+    rat->setAIState(IDLE);
+    rat->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
+   // sheep->setVelocity({0.0f, -500.0f});
+    rat->setColliderDimensions({
+        rat->getScale().x / 2.0f,
+        rat->getScale().y
+    });
+    //ratsheep->setJumpingPower(600.0f);
+    rat->setAcceleration({ 0.0f, ACCELERATION_OF_GRAVITY });
+    mGameState.entities.push_back(rat);
 }
 
 void LevelB::update(float deltaTime)
 {
+    std::cout << "number of lives left: " << mGameState.lives << std::endl;
     UpdateMusicStream(mGameState.bgm);
 
     mGameState.blob->update(
@@ -91,16 +146,23 @@ void LevelB::update(float deltaTime)
         mGameState.entities        // collidable entities
                       // col. entity count
     );
-
+    if (mGameState.blob->isTakingDamage()) {
+        mGameState.lives--;
+        mGameState.blob->setTakingDamage(false);
+    }
+    if (mGameState.blob->getPosition().y > 1200.0f) {
+        mGameState.lives--;
+        reset();
+    }
     for (size_t i = 0; i < mGameState.entities.size(); i++) {
         if (mGameState.entities[i] == nullptr) continue;
        // if (mGameState.entities[i]->getEntityType() == PLATFORM) {
-            std::vector<Entity*> blank;
+          //  std::vector<Entity*> blank;
             mGameState.entities[i]->update(
                 deltaTime,
                 mGameState.blob,
                 mGameState.map,
-                blank);
+                mGameState.entities);
       //  }
           if (!mGameState.entities[i]->isActive()) {
               mGameState.entities[i] = nullptr;
@@ -109,8 +171,10 @@ void LevelB::update(float deltaTime)
             isKeyAcquired = true;
         }
     }
-    if (isKeyAcquired)
-        mGameState.nextSceneID = LEVEL_C;
+    if (mGameState.blob->getExitReached()) reachedDoor = true;
+    if (isKeyAcquired && reachedDoor)
+        mGameState.nextSceneID = LEVEL_B;
+    if (mGameState.lives == 0) std::cout<<"You lose!"<<std::endl;
 }
 
 void LevelB::render()
@@ -137,6 +201,7 @@ void LevelB::shutdown()
     UnloadSound(mGameState.jumpSound);
     mGameState.jumpSound = {};
 }
+
 void LevelB::reset() {
     int remainingLives = mGameState.lives;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {

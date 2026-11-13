@@ -70,7 +70,7 @@ void Entity::checkCollisionY(
     {
         // STEP 1: For every entity that our player can collide with...
         Entity* collidableEntity = collidableEntities[i];
-
+        if (!collidableEntity->isActive()) continue;
         if (isColliding(collidableEntity))
         {
             // STEP 2: Calculate the distance between its centre and our centre
@@ -89,10 +89,12 @@ void Entity::checkCollisionY(
                 mPosition.y        -= yOverlap;
                 mVelocity.y         = 0;
                 mIsCollidingBottom  = true;
-                if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
-                if (collidableEntity->getEntityType() == DOOR) exitReached = true;
-                if (collidableEntity->getEntityType() == NPC) {
-                    if (takeDamage()) mTakingDamage = true;
+                if (mEntityType == PLAYER) {
+                    if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
+                    if (collidableEntity->getEntityType() == DOOR) exitReached = true;
+                    if (collidableEntity->getEntityType() == NPC) {
+                        if (takeDamage()) mTakingDamage = true;
+                    }
                 }
             }
             else if (mVelocity.y < 0)
@@ -100,12 +102,15 @@ void Entity::checkCollisionY(
                 mPosition.y     += yOverlap;
                 mVelocity.y      = 0;
                 mIsCollidingTop  = true;
-                if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
-                if (collidableEntity->getEntityType() == DOOR) exitReached = true;
-                if (collidableEntity->getEntityType() == NPC) {
-                    if (takeDamage()) mTakingDamage = true;
+                if (mEntityType == PLAYER) {
+                    if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
+                    if (collidableEntity->getEntityType() == DOOR) exitReached = true;
+                    if (collidableEntity->getEntityType() == NPC) {
+                        if (takeDamage()) mTakingDamage = true;
+                    }
                 }
             }
+
         }
     }
 }
@@ -118,7 +123,7 @@ void Entity::checkCollisionX(
     {
         // STEP 1: For every entity that our player can collide with...
         Entity* collidableEntity = collidableEntities[i];
-
+     //   if (!collidableEntity->isActive()) continue;
         if (isColliding(collidableEntity))
         {
             // When standing on a platform, we're always slightly overlapping
@@ -148,10 +153,12 @@ void Entity::checkCollisionX(
 
                 // Collision!
                 mIsCollidingRight = true;
-                if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
-                if (collidableEntity->getEntityType() == DOOR) exitReached = true;
-                if (collidableEntity->getEntityType() == NPC) {
-                    if (takeDamage()) mTakingDamage = true;
+                if (mEntityType == PLAYER) {
+                    if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
+                    if (collidableEntity->getEntityType() == DOOR) exitReached = true;
+                    if (collidableEntity->getEntityType() == NPC) {
+                        if (takeDamage()) mTakingDamage = true;
+                    }
                 }
             }
             else if (mVelocity.x < 0)
@@ -161,10 +168,12 @@ void Entity::checkCollisionX(
 
                 // Collision!
                 mIsCollidingLeft = true;
-                if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
-                if (collidableEntity->getEntityType() == DOOR) exitReached = true;
-                if (collidableEntity->getEntityType() == NPC) {
-                    if (takeDamage()) mTakingDamage = true;
+                if (mEntityType == PLAYER) {
+                    if (collidableEntity->getEntityType() == KEY) collidableEntity->setAcquired();
+                    if (collidableEntity->getEntityType() == DOOR) exitReached = true;
+                    if (collidableEntity->getEntityType() == NPC) {
+                        if (takeDamage()) mTakingDamage = true;
+                    }
                 }
             }
         }
@@ -246,13 +255,32 @@ void Entity::checkCollisionX(Map *map)
     Vector2 rightCentreProbe = {
         mPosition.x + (mColliderDimensions.x / 2.0f), mPosition.y
     };
+    Vector2 topLeftProbe = {
+        mPosition.x - (mColliderDimensions.x / 2.0f),
+        mPosition.y - (mColliderDimensions.y / 2.0f)
+    };
+    Vector2 topRightProbe = {
+        mPosition.x + (mColliderDimensions.x / 2.0f),
+        mPosition.y - (mColliderDimensions.y / 2.0f)
+    };
+
+    Vector2 bottomLeftProbe = {
+        mPosition.x - (mColliderDimensions.x / 2.0f),
+        mPosition.y + (mColliderDimensions.y / 2.0f)
+    };
+    Vector2 bottomRightProbe = {
+        mPosition.x + (mColliderDimensions.x / 2.0f),
+        mPosition.y + (mColliderDimensions.y / 2.0f)
+    };
 
     float xOverlap = 0.0f;
     float yOverlap = 0.0f;
 
     // COLLISION ON RIGHT (moving right)
-    if (map->isSolidTileAt(rightCentreProbe, &xOverlap, &yOverlap) &&
-        mVelocity.x > 0.0f && yOverlap >= 0.5f)
+    if ((map->isSolidTileAt(rightCentreProbe, &xOverlap, &yOverlap) ||
+        map->isSolidTileAt(topRightProbe, &xOverlap, &yOverlap) ||
+        map->isSolidTileAt(bottomRightProbe, &xOverlap, &yOverlap))    &&
+             mVelocity.x > 0.0f && yOverlap >= 0.5f)
     {
         mPosition.x       -= xOverlap * 1.01f; // push left
         mVelocity.x        = 0.0f;
@@ -264,7 +292,9 @@ void Entity::checkCollisionX(Map *map)
     }
 
     // COLLISION ON LEFT (moving left)
-    if (map->isSolidTileAt(leftCentreProbe, &xOverlap, &yOverlap) &&
+    if ((map->isSolidTileAt(leftCentreProbe, &xOverlap, &yOverlap) ||
+        map->isSolidTileAt(topLeftProbe, &xOverlap, &yOverlap) ||
+        map->isSolidTileAt(bottomLeftProbe, &xOverlap, &yOverlap)) &&
         mVelocity.x < 0.0f && yOverlap >= 0.5f)
     {
         mPosition.x      += xOverlap * 1.01f; // push right
@@ -329,9 +359,9 @@ void Entity::animate(float deltaTime)
     }
 }
 
-void Entity::throwPlatform() {
-    mDirection = THROW;
-}
+// void Entity::throwPlatform() {
+//     mDirection = THROW;
+// }
 bool Entity::takeDamage()
 {
      if (mDamageCooldown > 0.0f) return false;
@@ -360,10 +390,7 @@ void Entity::displayCollider()
     );
 }
 
-void Entity::AIWander()
-{
-    moveLeft();
-}
+void Entity::AIWander(){moveLeft();}
 
 void Entity::AIFollow(Entity *target)
 {
@@ -387,18 +414,34 @@ void Entity::AIFollow(Entity *target)
         break;
     }
 }
-
+void Entity::AIFly(float deltaTime){
+    // if (mDirection == RIGHT && mPosition.x < mFlyBoundaries.second.x) mPosition.x += mSpeed * deltaTime;
+    // else if (mDirection == LEFT && mPosition.x > mFlyBoundaries.first.x) mPosition.x -= mSpeed * deltaTime;
+    // if (mPosition.x > mFlyBoundaries.second.x) {
+    //     mPosition.x = mFlyBoundaries.second.x - 10.0f;
+    //     mDirection = LEFT;
+    // }
+    // else if (mPosition.x < mFlyBoundaries.first.x) {
+    //     mPosition.x = mFlyBoundaries.first.x + 10.0f;
+    //     mDirection = RIGHT;
+    // }
+}
 void Entity::AILerp(Entity *target, float deltaTime)
 {
+    if (target->getPosition().x < mPosition.x) mDirection = LEFT;
+    else mDirection = RIGHT;
 
-    //position' = position + (target position - position) * lerp factor * delta time
+    float distance = Vector2Distance(mPosition, target->getPosition());
     switch (mAIState) {
         case IDLE:
-            if (Vector2Distance(mPosition, target->getPosition()) < 350.0f)
+            if (distance < 350.0f)
                 mAIState = FOLLOWING;
             break;
         case FOLLOWING:
-            mPosition = mPosition + (target->getPosition() - mPosition) * mLerpFactor * deltaTime;
+            if (distance > 150.0f) {
+                mPosition = mPosition + (target->getPosition() - mPosition) * mLerpFactor * deltaTime;
+            }
+
     }
 }
 
@@ -428,8 +471,8 @@ void Entity::AIActivate(Entity *target, float deltaTime)
     case LERPER:
         AILerp(target, deltaTime);
         break;
-    // case JUMPER:
-    //     AIJump();
+    // case FLYER:
+    //     AIFly(deltaTime);
     //     break;
     default:
         break;
@@ -446,7 +489,7 @@ void Entity::update(
 {
     if (mEntityStatus == INACTIVE) return;
 
-    if (mEntityType == NPC && mAIType != JUMPER) AIActivate(player, deltaTime);
+    if (mEntityType == NPC && mAIType != JUMPER && mAIType != FLYER) AIActivate(player, deltaTime);
 
     if (mEntityType == PLAYER) {
         mScale = {100.0f * 45.0f / 60.0f * mass / 2.0f, 100.0f * mass / 2.0f};
@@ -480,12 +523,24 @@ void Entity::update(
     // if (mEntityType == KEY && acquired) {
     //     mPosition = {player->getPosition().x, player->getPosition().y - player->getColliderDimensions().y / 2.0f};
     // }
-    if (mEntityType != PLATFORM && mEntityType != KEY ) {
+    if (mEntityType != PLATFORM && mEntityType != KEY && mAIType != FLYER) {
         mVelocity.x = mMovement.x * mSpeed;
         mVelocity.x += mAcceleration.x * deltaTime;
         mVelocity.y += mAcceleration.y * deltaTime;
     }
 
+    if (mAIType == FLYER) {
+        if (mDirection == RIGHT && mPosition.x < mFlyBoundaries.second.x) mPosition.x += mSpeed * deltaTime;
+        else if (mDirection == LEFT && mPosition.x > mFlyBoundaries.first.x) mPosition.x -= mSpeed * deltaTime;
+        if (mPosition.x > mFlyBoundaries.second.x) {
+            mPosition.x = mFlyBoundaries.second.x - 10.0f;
+            mDirection = LEFT;
+        }
+        else if (mPosition.x < mFlyBoundaries.first.x) {
+            mPosition.x = mFlyBoundaries.first.x + 10.0f;
+            mDirection = RIGHT;
+        }
+    }
     //if (mEntityType == PLAYER) scaleSize();
     // ––––– JUMPING ––––– //
     if (mIsJumping)
@@ -497,7 +552,7 @@ void Entity::update(
         mVelocity.y -= mJumpingPower;
     }
 
-    if (mEntityType != PLATFORM && mEntityType!= KEY) {
+    if (mEntityType != PLATFORM && mEntityType!= KEY && mEntityType != FLYER) {
         mPosition.y += mVelocity.y * deltaTime;
         checkCollisionY(collidableEntities);
         checkCollisionY(map);
@@ -563,6 +618,9 @@ void Entity::render()
     };
 
     // Render the texture on screen
+    if (mEntityType == NPC) {
+        if (mDirection == RIGHT) textureArea.width *= -1.0f;
+    }
     DrawTexturePro(
         mTexture,
         textureArea, destinationArea, originOffset,
