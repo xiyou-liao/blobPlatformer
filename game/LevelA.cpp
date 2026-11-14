@@ -14,11 +14,9 @@ void LevelA::initialize()
 {
     mGameState.nextSceneID = NO_SCENE;
 
-    //mGameState.bgm = LoadMusicStream("assets/game/04 - Silent Forest.wav");
     SetMusicVolume(mGameState.bgm, 0.33f);
     PlayMusicStream(mGameState.bgm);
 
-   // mGameState.jumpSound = LoadSound("assets/game/Dirt Jump.wav");
 
     /*
         ----------- MAP -----------
@@ -26,7 +24,7 @@ void LevelA::initialize()
     mGameState.map = new Map(
         LEVEL_WIDTH, LEVEL_HEIGHT, // map grid cols & rows
         mLevelData,                // grid data
-        "assets/tileset.png", // texture filepath
+        "assets/desertTile.png", // texture filepath
         TILE_DIMENSION,            // tile size
         4, 1,                      // texture cols & rows
         mOrigin                    // in-game origin
@@ -81,7 +79,6 @@ void LevelA::initialize()
     mGameState.entities.push_back(key);
     mGameState.entities.push_back(door);
 
-    // @see dyru.itch.io/pixel-ghost-template
     Entity* sheep = new Entity(
         mGameState.map->getCoords(9, 10), // position
         { 75.0f, 75.0f },                       // scale
@@ -112,7 +109,6 @@ void LevelA::initialize()
     rat->setAIType(LERPER);
     rat->setAIState(IDLE);
     rat->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
-   // sheep->setVelocity({0.0f, -500.0f});
     rat->setColliderDimensions({
         rat->getScale().x / 2.0f,
         rat->getScale().y
@@ -133,7 +129,6 @@ void LevelA::initialize()
 
 void LevelA::update(float deltaTime)
 {
-    std::cout << "number of lives left: " << mGameState.lives << std::endl;
     UpdateMusicStream(mGameState.bgm);
 
     mGameState.blob->update(
@@ -203,6 +198,9 @@ void LevelA::shutdown()
 
 void LevelA::respawn() {
     int remainingLives = mGameState.lives;
+    mGameState.nextSceneID = NO_SCENE;
+    isKeyAcquired = false;
+    reachedDoor = false;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
         delete mGameState.entities[i];
     }
@@ -215,6 +213,9 @@ void LevelA::respawn() {
 
 void LevelA::restart() {
     int remainingLives = mGameState.lives;
+    mGameState.nextSceneID = NO_SCENE;
+    isKeyAcquired = false;
+    reachedDoor = false;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
         delete mGameState.entities[i];
     }

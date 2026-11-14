@@ -180,7 +180,6 @@ public:
     }
     void setAcquired() {
         acquired = true;
-        //mEntityStatus = INACTIVE;
     }
     void setFlyBoundaries(std::pair<Vector2, Vector2> boundaries){mFlyBoundaries = boundaries;}
     void setPosition(Vector2 newPosition)

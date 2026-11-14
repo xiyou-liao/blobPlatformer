@@ -7,13 +7,14 @@ Lose::Lose()
 Lose::Lose(Vector2 origin, const char *bgHexCode)
     : Scene{ origin, bgHexCode }
 {}
+Lose::~Lose(){}
 void Lose::initialize(){}
 void Lose::update(float deltaTime){}
 void Lose::render(){
     ClearBackground(ColorFromHex(mBGColourHexCode));
 
-    DrawText("Press ENTER to return to start.",
-            mOrigin.x / 2.0f, mOrigin.y / 2.0f,
+    DrawText("YOU LOSE. Press ENTER to return to start.",
+            100.0f, mOrigin.y / 2.0f,
             50.0, BLACK);
 }
 void Lose::shutdown() {}

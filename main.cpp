@@ -10,17 +10,15 @@ constexpr Vector2 ORIGIN           = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
 
 constexpr float FIXED_TIMESTEP = 1.0f / 60.0f;
 
+Texture2D healthyLifeTexture;
+Texture2D lostLifeTexture;
 
 // Global Variables
 AppStatus gAppStatus       = RUNNING;
 float     gPreviousTicks   = 0.0f,
           gTimeAccumulator = 0.0f;
-//int lives = 5;
 
-//Vector2 gMousePosition = GetMousePosition();
 bool placePlatform = false;
-//bool absorbPlatform = false;
-
 
 Camera2D gCamera = {};
 
@@ -45,6 +43,8 @@ void switchToScene(Scene *scene)
     }
     gCurrentScene = scene;
     gCurrentScene->getState().lives = currentLives;
+    gCurrentScene->getState().nextSceneID = NO_SCENE;
+    gCurrentScene->restart();
     gCurrentScene->initialize();
     if (gCurrentScene->getState().blob != nullptr) {
         gCamera.target = gCurrentScene->getState().blob->getPosition();
@@ -55,12 +55,16 @@ void switchToScene(Scene *scene)
 void initialize() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Blob Platformer");
 
-    gLevels[LEVEL_A] = new LevelA(ORIGIN, "#3A5A40");
+    healthyLifeTexture = LoadTexture("assets/healthyLife.png");
+    lostLifeTexture = LoadTexture("assets/lostLife.png");
+
+
+    gLevels[LEVEL_A] = new LevelA(ORIGIN, "#C3D1E5");
     gLevels[LEVEL_B] = new LevelB(ORIGIN, "#2A2C28");
-    gLevels[LEVEL_T] = new LevelT(ORIGIN, "DAD7CD");
-    gLevels[START] = new Start(ORIGIN, "FFFFFF");
-    gLevels[LOSE] = new Lose(ORIGIN, "FFFFFF");
-    gLevels[WIN] = new Win(ORIGIN, "FFFFFF");
+    gLevels[LEVEL_T] = new LevelT(ORIGIN, "#E1F6FF");
+    gLevels[START] = new Start(ORIGIN, "#FFFFFF");
+    gLevels[LOSE] = new Lose(ORIGIN, "#FFFFFF");
+    gLevels[WIN] = new Win(ORIGIN, "#FFFFFF");
 
     switchToScene(gLevels[START]);
 
@@ -194,7 +198,40 @@ void render()
         gCurrentScene->render();
         EndMode2D();
     }
+    if (gCurrentScene != gLevels[START] && gCurrentScene != gLevels[LOSE] && gCurrentScene != gLevels[WIN]) {
+        for (int i = 0; i<5; i++) {
+            Vector2 healthBarCoords = {50.0f + 75.0f * i, 50.0f};
+            Rectangle textureAreaHealthyLife = {
+                0.0f, 0.0f,
+                static_cast<float>(healthyLifeTexture.width), static_cast<float>(healthyLifeTexture.height)
+            };
 
+            Rectangle destinationAreaHealthyLife = {
+                healthBarCoords.x , healthBarCoords.y,
+                50.0f, 50.0f
+            };
+            Rectangle textureAreaLostLife = {
+                0.0f, 0.0f,
+                static_cast<float>(lostLifeTexture.width), static_cast<float>(lostLifeTexture.height)
+            };
+
+            Rectangle destinationAreaLostLife = {
+                healthBarCoords.x , healthBarCoords.y,
+                50.0f, 50.0f
+            };
+            Vector2 objectOrigin = {75.0f / 2.0f, 75.0f / 2.0f};
+            if (i<gCurrentScene->getState().lives) {
+                DrawTexturePro(healthyLifeTexture, textureAreaHealthyLife,
+               destinationAreaHealthyLife, objectOrigin, 0.0f, WHITE);
+            }else {
+                DrawTexturePro(lostLifeTexture, textureAreaLostLife,
+               destinationAreaLostLife, objectOrigin, 0.0f, WHITE);
+            }
+
+    }
+
+
+    }
     EndDrawing();
 }
 
@@ -204,6 +241,8 @@ void shutdown()
         delete entry.second;
 
     gLevels.clear();
+    UnloadTexture(healthyLifeTexture);
+    UnloadTexture(lostLifeTexture);
 
     CloseAudioDevice();
     CloseWindow();

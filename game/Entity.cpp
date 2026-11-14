@@ -414,18 +414,7 @@ void Entity::AIFollow(Entity *target)
         break;
     }
 }
-void Entity::AIFly(float deltaTime){
-    // if (mDirection == RIGHT && mPosition.x < mFlyBoundaries.second.x) mPosition.x += mSpeed * deltaTime;
-    // else if (mDirection == LEFT && mPosition.x > mFlyBoundaries.first.x) mPosition.x -= mSpeed * deltaTime;
-    // if (mPosition.x > mFlyBoundaries.second.x) {
-    //     mPosition.x = mFlyBoundaries.second.x - 10.0f;
-    //     mDirection = LEFT;
-    // }
-    // else if (mPosition.x < mFlyBoundaries.first.x) {
-    //     mPosition.x = mFlyBoundaries.first.x + 10.0f;
-    //     mDirection = RIGHT;
-    // }
-}
+
 void Entity::AILerp(Entity *target, float deltaTime)
 {
     if (target->getPosition().x < mPosition.x) mDirection = LEFT;
@@ -444,19 +433,6 @@ void Entity::AILerp(Entity *target, float deltaTime)
 
     }
 }
-
-// void Entity::AIJump() {
-//     if (mIsJumping)
-//     {
-//         // STEP 1: Immediately return the flag to its original false state
-//         mIsJumping = false;
-//
-//         // STEP 2: The player now acquires an upward velocity
-//         mVelocity.y = -mJumpingPower;
-//     }
-//     else if (mIsJumping == false && mVelocity.y == 0.0f) mIsJumping = true;
-// }
-
 
 void Entity::AIActivate(Entity *target, float deltaTime)
 {
@@ -625,5 +601,5 @@ void Entity::render()
         mAngle, WHITE
     );
 
-     displayCollider();
+  //   displayCollider();
 }

@@ -13,11 +13,9 @@ LevelB::~LevelB() { shutdown(); }
 void LevelB::initialize() {
     mGameState.nextSceneID = NO_SCENE;
 
-    //mGameState.bgm = LoadMusicStream("assets/game/04 - Silent Forest.wav");
     SetMusicVolume(mGameState.bgm, 0.33f);
     PlayMusicStream(mGameState.bgm);
 
-    // mGameState.jumpSound = LoadSound("assets/game/Dirt Jump.wav");
 
     /*
         ----------- MAP -----------
@@ -25,7 +23,7 @@ void LevelB::initialize() {
     mGameState.map = new Map(
         LEVEL_WIDTH, LEVEL_HEIGHT, // map grid cols & rows
         mLevelData,                // grid data
-        "assets/tileset.png", // texture filepath
+        "assets/caveTile.png", // texture filepath
         TILE_DIMENSION,            // tile size
         4, 1,                      // texture cols & rows
         mOrigin                    // in-game origin
@@ -124,7 +122,6 @@ void LevelB::initialize() {
     rat->setAIType(LERPER);
     rat->setAIState(IDLE);
     rat->setSpeed(Entity::DEFAULT_SPEED * 0.50f);
-   // sheep->setVelocity({0.0f, -500.0f});
     rat->setColliderDimensions({
         rat->getScale().x / 2.0f,
         rat->getScale().y
@@ -146,7 +143,6 @@ void LevelB::initialize() {
 
 void LevelB::update(float deltaTime)
 {
-    std::cout << "number of lives left: " << mGameState.lives << std::endl;
     UpdateMusicStream(mGameState.bgm);
 
     mGameState.blob->update(
@@ -216,6 +212,9 @@ void LevelB::shutdown()
 
 void LevelB::respawn() {
     int remainingLives = mGameState.lives;
+    mGameState.nextSceneID = NO_SCENE;
+    isKeyAcquired = false;
+    reachedDoor = false;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
         delete mGameState.entities[i];
     }
@@ -228,6 +227,9 @@ void LevelB::respawn() {
 
 void LevelB::restart() {
     int remainingLives = mGameState.lives;
+    mGameState.nextSceneID = NO_SCENE;
+    isKeyAcquired = false;
+    reachedDoor = false;
     for (size_t i = 0; i<mGameState.entities.size(); i++) {
         delete mGameState.entities[i];
     }

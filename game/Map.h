@@ -61,4 +61,4 @@ public:
     float         getBottomBoundary() const { return mBottomBoundary; }
 };
 
-#endif //BLOBPLATFORMER_MAP_H
+#endif //MAP_H
