@@ -1,11 +1,9 @@
 #ifndef WIN_H
 #define WIN_H
 
-#include "Lose.h"
+#include "Scene.h"
 
-class Win : public Scene
-{
-
+class Win : public Scene {
 public:
     Win();
     Win(Vector2 origin, const char *bgHexCode);

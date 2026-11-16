@@ -3,9 +3,7 @@
 
 #include "Scene.h"
 
-class Start : public Scene
-{
-
+class Start : public Scene {
 public:
     Start();
     Start(Vector2 origin, const char *bgHexCode);

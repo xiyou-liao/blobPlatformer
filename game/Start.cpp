@@ -1,12 +1,8 @@
 #include "Start.h"
 
-Start::Start()
-    : Scene{ { 0.0f, 0.0f }, "#000000" }
-{}
+Start::Start() : Scene{ { 0.0f, 0.0f }, "#000000" } {}
 
-Start::Start(Vector2 origin, const char *bgHexCode)
-    : Scene{ origin, bgHexCode }
-{}
+Start::Start(Vector2 origin, const char *bgHexCode) : Scene{ origin, bgHexCode } {}
 
 Start::~Start() {}
 
@@ -34,6 +30,7 @@ void Start::render(){
          800.0f, 700.0f,
          50, BLACK);
 }
+
 void Start::shutdown() {
     UnloadTexture(mBackgroundTexture);
 }

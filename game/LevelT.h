@@ -2,8 +2,23 @@
 #define LEVELC_H
 
 #include "LevelB.h"
-class LevelT : public Scene
-{
+class LevelT : public Scene {
+public:
+    static constexpr float TILE_DIMENSION = 75.0f;
+    static constexpr float ACCELERATION_OF_GRAVITY = 981.0f;
+    //static constexpr float END_GAME_THRESHOLD = 800.0f;
+
+    LevelT();
+    LevelT(Vector2 origin, const char *bgHexCode);
+    ~LevelT();
+
+    void initialize() override;
+    void update(float deltaTime) override;
+    void render() override;
+    void shutdown() override;
+    void respawn() override;
+    void restart() override;
+
 private:
     unsigned int mLevelData[LEVEL_WIDTH * LEVEL_HEIGHT] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -22,24 +37,6 @@ private:
         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4,
         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4,
         4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4
-
     };
-
-public:
-    static constexpr float TILE_DIMENSION          = 75.0f,
-                           ACCELERATION_OF_GRAVITY = 981.0f,
-                           END_GAME_THRESHOLD      = 800.0f;
-
-    LevelT();
-    LevelT(Vector2 origin, const char *bgHexCode);
-    ~LevelT();
-
-    void initialize() override;
-    void update(float deltaTime) override;
-    void render() override;
-    void shutdown() override;
-    void respawn() override;
-    void restart() override;
-
 };
 #endif //LEVELC_H

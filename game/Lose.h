@@ -1,10 +1,9 @@
 #ifndef LOSE_H
 #define LOSE_H
 
-#include "Start.h"
+#include "Scene.h"
 
-class Lose : public Scene
-{
+class Lose : public Scene {
 public:
     Lose();
     Lose(Vector2 origin, const char *bgHexCode);
