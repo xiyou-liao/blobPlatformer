@@ -10,16 +10,33 @@ Start::Start(Vector2 origin, const char *bgHexCode)
 
 Start::~Start() {}
 
-void Start::initialize(){}
+void Start::initialize() {
+    mBackgroundTexture = LoadTexture("assets/startScreen.png");
+}
 void Start::update(float deltaTime) {}
 void Start::render(){
     ClearBackground(ColorFromHex(mBGColourHexCode));
+    Vector2 objectOrigin = {0.0f, 0.0f};
 
-    DrawText("Press ENTER to start.",
-            mOrigin.x / 2.0f, mOrigin.y / 2.0f,
-            50.0, BLACK);
+    Rectangle textureAreaBackground = {
+        0.0f, 0.0f,
+        static_cast<float>(mBackgroundTexture.width),
+        static_cast<float>(mBackgroundTexture.height),
+    };
+    Rectangle destinationAreaBackground = {
+        0.0f, 0.0f,
+        1500.0f, 1000.0f
+    };
+
+    DrawTexturePro(mBackgroundTexture, textureAreaBackground,
+        destinationAreaBackground, objectOrigin, 0.0f , WHITE);
+    DrawText("Press ENTER to start.\n Press Q to quit.",
+         800.0f, 700.0f,
+         50, BLACK);
 }
-void Start::shutdown() {}
+void Start::shutdown() {
+    UnloadTexture(mBackgroundTexture);
+}
 
 void Start::respawn() {}
 

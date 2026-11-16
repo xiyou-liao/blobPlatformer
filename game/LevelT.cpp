@@ -13,7 +13,7 @@ LevelT::~LevelT() { shutdown(); }
 void LevelT::initialize()
 {
     mGameState.nextSceneID = NO_SCENE;
-    mGameState.damageTakenSound = LoadSound("assets/damageTakenSound.wav");
+    mGameState.damageTakenSound = LoadSound("assets/damageTakenSound.wav"); //credit to Aeva on OpenGameArt.org
     SetSoundVolume(mGameState.damageTakenSound, 0.8f);
 
     /*

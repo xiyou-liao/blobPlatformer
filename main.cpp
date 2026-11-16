@@ -58,15 +58,14 @@ void initialize() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Blob Platformer");
 
     InitAudioDevice();
-    gBGM = LoadMusicStream("assets/Sunflower Dance Party.mp3");
+    gBGM = LoadMusicStream("assets/Sunflower Dance Party.mp3"); //credit to Kevin MacLeod
     SetMusicVolume(gBGM, 0.33f);
     PlayMusicStream(gBGM);
 
-   // gJumpSound = LoadSound("assets/game/Dirt Jump.wav");
-    gPlatformThrowSound = LoadSound("assets/platformThrowSound.mp3");
+    gPlatformThrowSound = LoadSound("assets/platformThrowSound.mp3"); //credit to pauliuw on OpenGameArt.org
     SetSoundVolume(gPlatformThrowSound, 1.0f);
 
-    gJumpSound = LoadSound("assets/jumpSound.ogg");
+    gJumpSound = LoadSound("assets/jumpSound.ogg"); //credit to YoFranki! on OpenGameArt.org
     SetSoundVolume(gJumpSound, 1.0f);
 
     healthyLifeTexture = LoadTexture("assets/healthyLife.png");
@@ -77,8 +76,8 @@ void initialize() {
     gLevels[LEVEL_B] = new LevelB(ORIGIN, "#2A2C28");
     gLevels[LEVEL_T] = new LevelT(ORIGIN, "#E1F6FF");
     gLevels[START] = new Start(ORIGIN, "#FFFFFF");
-    gLevels[LOSE] = new Lose(ORIGIN, "#FFFFFF");
-    gLevels[WIN] = new Win(ORIGIN, "#FFFFFF");
+    gLevels[LOSE] = new Lose(ORIGIN, "#000000");
+    gLevels[WIN] = new Win(ORIGIN, "#ABF7B1");
 
     switchToScene(gLevels[START]);
 

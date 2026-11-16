@@ -16,6 +16,8 @@ public:
     void shutdown() override;
     void respawn() override;
     void restart() override;
+private:
+    Texture2D mBackgroundTexture;
 };
 
 #endif //LOSE_H

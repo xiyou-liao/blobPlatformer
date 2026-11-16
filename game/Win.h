@@ -5,6 +5,7 @@
 
 class Win : public Scene
 {
+
 public:
     Win();
     Win(Vector2 origin, const char *bgHexCode);
@@ -16,6 +17,8 @@ public:
     void shutdown() override;
     void respawn() override;
     void restart() override;
+private:
+    Texture2D mBackgroundTexture;
 };
 
 #endif //WIN_H
