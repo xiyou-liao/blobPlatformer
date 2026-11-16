@@ -11,8 +11,9 @@ struct GameState
 
     int lives = 5;
 
-    Music bgm;
-    Sound jumpSound;
+    // Music bgm;
+    // Sound jumpSound;
+     Sound damageTakenSound;
 
     SceneID nextSceneID = NO_SCENE;
 };

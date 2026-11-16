@@ -13,10 +13,8 @@ LevelT::~LevelT() { shutdown(); }
 void LevelT::initialize()
 {
     mGameState.nextSceneID = NO_SCENE;
-
-    SetMusicVolume(mGameState.bgm, 0.33f);
-    PlayMusicStream(mGameState.bgm);
-
+    mGameState.damageTakenSound = LoadSound("assets/damageTakenSound.wav");
+    SetSoundVolume(mGameState.damageTakenSound, 0.8f);
 
     /*
         ----------- MAP -----------
@@ -120,7 +118,6 @@ void LevelT::initialize()
 
 void LevelT::update(float deltaTime)
 {
-    UpdateMusicStream(mGameState.bgm);
 
     mGameState.blob->update(
         deltaTime,      // delta time / fixed timestep
@@ -132,8 +129,9 @@ void LevelT::update(float deltaTime)
     if (mGameState.blob->isTakingDamage()) {
         mGameState.lives--;
         mGameState.blob->setTakingDamage(false);
+        PlaySound(mGameState.damageTakenSound);
     }
-    if (mGameState.blob->getPosition().y > 1200.0f) {
+    if (mGameState.blob->getPosition().y > 1400.0f) {
         mGameState.lives--;
         respawn();
     }
@@ -205,10 +203,8 @@ void LevelT::shutdown()
     delete mGameState.map;
     mGameState.map = nullptr;
 
-    UnloadMusicStream(mGameState.bgm);
-    mGameState.bgm = {};
-    UnloadSound(mGameState.jumpSound);
-    mGameState.jumpSound = {};
+    UnloadSound(mGameState.damageTakenSound);
+    mGameState.damageTakenSound = {};
 }
 
 void LevelT::respawn() {

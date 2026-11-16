@@ -14,9 +14,8 @@ void LevelA::initialize()
 {
     mGameState.nextSceneID = NO_SCENE;
 
-    SetMusicVolume(mGameState.bgm, 0.33f);
-    PlayMusicStream(mGameState.bgm);
-
+    mGameState.damageTakenSound = LoadSound("assets/damageTakenSound.wav");
+    SetSoundVolume(mGameState.damageTakenSound, 0.8f);
 
     /*
         ----------- MAP -----------
@@ -45,7 +44,7 @@ void LevelA::initialize()
     float sizeRatio = 45.0f/60.0f;
 
     Vector2 spawn = {mGameState.map->getLeftBoundary(), mGameState.map->getTopBoundary()};
-  //  mSpawnPoint = spawn;
+
     mGameState.blob = new Entity(
         spawn, // position
         { 100.0f * sizeRatio, 100.0f },             // scale
@@ -129,7 +128,6 @@ void LevelA::initialize()
 
 void LevelA::update(float deltaTime)
 {
-    UpdateMusicStream(mGameState.bgm);
 
     mGameState.blob->update(
         deltaTime,      // delta time / fixed timestep
@@ -141,6 +139,7 @@ void LevelA::update(float deltaTime)
     if (mGameState.blob->isTakingDamage()) {
         mGameState.lives--;
         mGameState.blob->setTakingDamage(false);
+        PlaySound(mGameState.damageTakenSound);
     }
     if (mGameState.blob->getPosition().y > 1200.0f) {
         mGameState.lives--;
@@ -190,10 +189,9 @@ void LevelA::shutdown()
     delete mGameState.map;
     mGameState.map = nullptr;
 
-    UnloadMusicStream(mGameState.bgm);
-    mGameState.bgm = {};
-    UnloadSound(mGameState.jumpSound);
-    mGameState.jumpSound = {};
+    UnloadSound(mGameState.damageTakenSound);
+    mGameState.damageTakenSound = {};
+
 }
 
 void LevelA::respawn() {

@@ -21,7 +21,9 @@ float     gPreviousTicks   = 0.0f,
 bool placePlatform = false;
 
 Camera2D gCamera = {};
-
+Music gBGM;
+Sound gJumpSound;
+Sound gPlatformThrowSound;
 Scene *gCurrentScene = nullptr;
 std::map<SceneID, Scene*> gLevels = {};
 
@@ -55,6 +57,18 @@ void switchToScene(Scene *scene)
 void initialize() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Blob Platformer");
 
+    InitAudioDevice();
+    gBGM = LoadMusicStream("assets/Sunflower Dance Party.mp3");
+    SetMusicVolume(gBGM, 0.33f);
+    PlayMusicStream(gBGM);
+
+   // gJumpSound = LoadSound("assets/game/Dirt Jump.wav");
+    gPlatformThrowSound = LoadSound("assets/platformThrowSound.mp3");
+    SetSoundVolume(gPlatformThrowSound, 1.0f);
+
+    gJumpSound = LoadSound("assets/jumpSound.ogg");
+    SetSoundVolume(gJumpSound, 1.0f);
+
     healthyLifeTexture = LoadTexture("assets/healthyLife.png");
     lostLifeTexture = LoadTexture("assets/lostLife.png");
 
@@ -77,6 +91,9 @@ void initialize() {
 
 void processInput()
 {
+    if (IsKeyPressed(KEY_P)) {
+        PlaySound(gCurrentScene->getState().damageTakenSound);
+    }
     if (gCurrentScene == gLevels[START]) {
         if (IsKeyPressed(KEY_ENTER)) {
             switchToScene(gLevels[LEVEL_T]);
@@ -100,6 +117,7 @@ void processInput()
         if (IsKeyPressed(KEY_W) && gCurrentScene->getState().blob->isCollidingBottom())
         {
             gCurrentScene->getState().blob->jump();
+            PlaySound(gJumpSound);
         }
         if (!IsKeyDown(KEY_A) && !IsKeyDown(KEY_D) && !IsKeyDown(KEY_W)) gCurrentScene->getState().blob->standStill();
         // to avoid faster diagonal speed
@@ -111,6 +129,7 @@ void processInput()
             placePlatform = true;
         }
         if (placePlatform && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+
             Vector2 mousePosition = GetMousePosition();
             Vector2 blobPosition = gCurrentScene->getState().blob->getPosition();
             Vector2 worldMousePosition = {
@@ -136,6 +155,7 @@ void processInput()
                 newPlatform->setFlying();
                 newPlatform->setVelocity({direction.x * platformSpeed, direction.y * platformSpeed});
                 gCurrentScene->getState().entities.push_back(newPlatform);
+                PlaySound(gPlatformThrowSound);
 
                 gCurrentScene->getState().blob->decreaseMass();
                 placePlatform = false;
@@ -174,6 +194,8 @@ void update()
 
     while (deltaTime >= FIXED_TIMESTEP)
     {
+        UpdateMusicStream(gBGM);
+
         gCurrentScene->update(FIXED_TIMESTEP);
         deltaTime -= FIXED_TIMESTEP;
 
@@ -243,6 +265,9 @@ void shutdown()
     gLevels.clear();
     UnloadTexture(healthyLifeTexture);
     UnloadTexture(lostLifeTexture);
+    UnloadMusicStream(gBGM);
+    UnloadSound(gJumpSound);
+    UnloadSound(gPlatformThrowSound);
 
     CloseAudioDevice();
     CloseWindow();
