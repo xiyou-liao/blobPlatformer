@@ -81,7 +81,8 @@ void Entity::checkCollisionY(const std::vector<Entity*>& collidableEntities){
                 mIsCollidingTop = true;
                 if (mEntityType == PLAYER) {
                     if (collidableEntity->getEntityType() == DOOR) exitReached = true;
-                    if (collidableEntity->getEntityType() == NPC) {if (takeDamage()) mTakingDamage = true;
+                    if (collidableEntity->getEntityType() == NPC) {
+                        if (takeDamage()) mTakingDamage = true;
                     }
                 }
             }
@@ -268,18 +269,13 @@ bool Entity::isColliding(Entity *other) const {
     return xDistance < 0.0f && yDistance < 0.0f;
 }
 
-void Entity::animate(float deltaTime)
-{
-    //if (mTakingDamage) mAnimationIndices = mAnimationAtlas.at(HURT);
-    //else
-        mAnimationIndices = mAnimationAtlas.at(mDirection);
-
+void Entity::animate(float deltaTime) {
+    mAnimationIndices = mAnimationAtlas.at(mDirection);
 
     mAnimationTime += deltaTime;
     float secondsPerFrame = 1.0f / mFrameSpeed;
 
-    if (mAnimationTime >= secondsPerFrame)
-    {
+    if (mAnimationTime >= secondsPerFrame) {
         mAnimationTime = 0.0f;
         mCurrentFrameIndex++;
         if (mTakingDamage) {
@@ -288,8 +284,7 @@ void Entity::animate(float deltaTime)
                 mTakingDamage = false;
                 mCurrentFrameIndex = 0;
             }
-        }
-        else{mCurrentFrameIndex %= mAnimationIndices.size();}
+        }else{mCurrentFrameIndex %= mAnimationIndices.size();}
     }
 }
 
@@ -300,6 +295,7 @@ bool Entity::takeDamage() {
     mDamageCooldown = 1.0f;
     return true;
 }
+
 void Entity::displayCollider() {
     // draw the collision box
     Rectangle colliderBox = {
@@ -374,19 +370,18 @@ void Entity::AIActivate(Entity *target, float deltaTime){
 }
 
 void Entity::update(float deltaTime, Entity* player, Map* map,
-    const std::vector<Entity*>& collidableEntities
-) {
-    if (mEntityStatus == INACTIVE) return;
-    if (mEntityType == NPC && mAIType != JUMPER && mAIType != FLYER) {
-        AIActivate(player, deltaTime);
-    }
+    const std::vector<Entity*>& collidableEntities) {
+        if (mEntityStatus == INACTIVE) return;
+        if (mEntityType == NPC && mAIType != JUMPER && mAIType != FLYER) {
+            AIActivate(player, deltaTime);
+        }
 
-    if (mEntityType == PLAYER) {
-        mScale = {100.0f * 45.0f / 60.0f * mass / 2.0f,
-            100.0f * mass / 2.0f
-        };
-         mColliderDimensions = {mScale.x / 3.0f,mScale.y / 2.5f};
-    }
+        if (mEntityType == PLAYER) {
+            mScale = {100.0f * 45.0f / 60.0f * mass / 2.0f,
+                100.0f * mass / 2.0f
+            };
+             mColliderDimensions = {mScale.x / 3.0f,mScale.y / 2.5f};
+        }
 
     resetColliderFlags();
 
@@ -435,7 +430,7 @@ void Entity::update(float deltaTime, Entity* player, Map* map,
         mVelocity.y -= mJumpingPower;
     }
 
-    if (mEntityType != PLATFORM && mEntityType!= KEY && mEntityType != FLYER) {
+    if (mEntityType != PLATFORM && mEntityType!= KEY && mAIType != FLYER) {
         mPosition.y += mVelocity.y * deltaTime;
         checkCollisionY(collidableEntities);
         checkCollisionY(map);
@@ -478,14 +473,10 @@ void Entity::render() {
     }
 
     Rectangle destinationArea = {
-        mPosition.x, mPosition.y,
-        static_cast<float>(mScale.x), static_cast<float>(mScale.y)
+        mPosition.x, mPosition.y, mScale.x, mScale.y
     };
 
-    Vector2 originOffset = {
-        static_cast<float>(mScale.x) / 2.0f,
-        static_cast<float>(mScale.y) / 2.0f
-    };
+    Vector2 originOffset = { mScale.x / 2.0f, mScale.y / 2.0f };
 
     if (mEntityType == NPC) {
         if (mDirection == RIGHT) textureArea.width *= -1.0f;
@@ -498,6 +489,7 @@ void Entity::render() {
         textureArea, destinationArea, originOffset,
         mAngle, WHITE
     );
+
     //uncomment to see collision boxes for entities
     //displayCollider();
 }

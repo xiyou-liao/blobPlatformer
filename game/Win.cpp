@@ -14,7 +14,7 @@ void Win::render(){
     ClearBackground(ColorFromHex(mBGColourHexCode));
 
     DrawText("Blob made it home!",
-        50.0f, 200.0f,
+        100.0f, 200.0f,
         100, BLACK);
     DrawText("Press ENTER to return to start.\n Press Q to quit.",
          500.0f, 700.0f,

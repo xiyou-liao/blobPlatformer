@@ -35,7 +35,7 @@ public:
     ~Entity();
 
     void update(
-        float   deltaTime,
+        float deltaTime,
         Entity* player,
         Map* map,
         const std::vector<Entity*>& collidableEntities
@@ -55,8 +55,8 @@ public:
         mAcceleration = {0.0f, 0.0f};
         isFlying = false;
     }
-    void moveUp()    { mMovement.y = -1; mDirection = UP; }
-    void moveLeft()  { mMovement.x = -1; mDirection = LEFT; }
+    void moveUp() { mMovement.y = -1; mDirection = UP; }
+    void moveLeft() { mMovement.x = -1; mDirection = LEFT; }
     void moveRight() { mMovement.x =  1; mDirection = RIGHT; }
 
     void resetMovement() { mMovement = { 0.0f, 0.0f }; }
@@ -92,7 +92,7 @@ public:
     bool getExitReached() const {return exitReached;}
     bool isTakingDamage() const {return mTakingDamage;}
 
-    bool isCollidingTop()    const { return mIsCollidingTop; }
+    bool isCollidingTop() const { return mIsCollidingTop; }
     bool isCollidingBottom() const { return mIsCollidingBottom; }
 
     std::map<Direction, std::vector<int>> getAnimationAtlas() const {
@@ -121,7 +121,7 @@ public:
         mAcceleration = newAcceleration;
     }
     void setScale(Vector2 newScale) { mScale = newScale; }
-    void setTexture(const char *textureFilepath) {
+    void setTexture(const char* textureFilepath) {
         mTexture = LoadTexture(textureFilepath);
     }
     void setColliderDimensions(Vector2 newDimensions) {
@@ -205,9 +205,9 @@ private:
     }
 
     void animate(float deltaTime);
-    void AIActivate(Entity *target, float deltaTime);
+    void AIActivate(Entity* target, float deltaTime);
     void AIWander();
-    void AIFollow(Entity *target);
+    void AIFollow(Entity* target);
     void AILerp(Entity* target, float deltaTime);
 };
 

@@ -24,11 +24,8 @@ void LevelB::initialize() {
 
     //Protagonist
     std::map<Direction, std::vector<int>> blobAnimationAtlas = {
-    //    { STILL,  {0, 1, 2, 3, 4, 5} },
-        { RIGHT,  {6, 7, 8, 9, 10, 11} },
-        { LEFT,    {12, 13, 14, 15, 16, 17} },
-    //    { THROW,    {18, 19, 20, 21, 22, 23} },
-    //    { HURT,    {24, 25, 26, 27, 28, 29} }
+        { RIGHT, {6, 7, 8, 9, 10, 11} },
+        { LEFT, {12, 13, 14, 15, 16, 17} },
     };
     float sizeRatio = 45.0f/60.0f;
     mGameState.blob = new Entity(

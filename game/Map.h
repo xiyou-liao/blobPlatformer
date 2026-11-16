@@ -39,6 +39,7 @@ public:
     float getTopBoundary() const { return mTopBoundary; }
     float getBottomBoundary() const { return mBottomBoundary; }
 
+
 private:
     int mMapColumns;
     int mMapRows;

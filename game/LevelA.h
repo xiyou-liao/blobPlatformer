@@ -10,7 +10,6 @@ class LevelA : public Scene {
 public:
     static constexpr float TILE_DIMENSION = 75.0f;
     static constexpr float ACCELERATION_OF_GRAVITY = 981.0f;
-    //static constexpr float END_GAME_THRESHOLD = 800.0f;
 
     LevelA();
     LevelA(Vector2 origin, const char *bgHexCode);
@@ -22,6 +21,7 @@ public:
     void shutdown() override;
     void respawn() override;
     void restart() override;
+
 private:
     unsigned int mLevelData[LEVEL_WIDTH * LEVEL_HEIGHT] = {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

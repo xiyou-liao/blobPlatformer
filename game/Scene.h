@@ -24,7 +24,7 @@ protected:
 
 public:
     Scene();
-    Scene(Vector2 origin, const char *bgHexCode);
+    Scene(Vector2 origin, const char* bgHexCode);
     virtual ~Scene() {}
 
     virtual void initialize() = 0;
