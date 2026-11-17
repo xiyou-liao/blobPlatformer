@@ -1,3 +1,6 @@
+//Xiyou Liao
+//Scene.cpp
+
 #include "Scene.h"
 
 Scene::Scene() : mGameState{}, mOrigin{} {}

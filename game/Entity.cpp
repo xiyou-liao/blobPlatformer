@@ -1,3 +1,6 @@
+//Xiyou Liao
+//Entity.cpp
+
 #include "Entity.h"
 
 Entity::Entity() :

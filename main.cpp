@@ -1,3 +1,14 @@
+/**
+* Author: Xiyou Liao
+* Assignment: Rise of the AI
+* Date due: 11/16/2026
+* I pledge that I have completed this assignment without
+* collaborating with anyone else, in conformance with the
+* NYU School of Engineering Policies and Procedures on
+* Academic Misconduct.
+**/
+//main.cpp
+
 #include "game/LevelT.h"
 #include "game/Win.h"
 #include "game/Start.h"
@@ -36,7 +47,6 @@ void processInput();
 void update();
 void render();
 void shutdown();
-//void panCamera(Camera2D* camera, const Vector2* targetPosition);
 
 void switchToScene(Scene* scene){
     int currentLives = 5;
@@ -114,8 +124,7 @@ void processInput(){
             gCurrentScene->getState().blob->jump();
             PlaySound(gJumpSound);
         }
-      //  if (!IsKeyDown(KEY_A) && !IsKeyDown(KEY_D) && !IsKeyDown(KEY_W)) gCurrentScene->getState().blob->standStill();
-        // to avoid faster diagonal speed
+
         if (GetLength(gCurrentScene->getState().blob->getMovement()) > 1.0f) {
             gCurrentScene->getState().blob->normalizeMovement();
         }

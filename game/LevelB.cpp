@@ -1,3 +1,6 @@
+//Xiyou Liao
+//LevelB.cpp
+
 #include "LevelB.h"
 
 LevelB::LevelB() : Scene{ { 0.0f, 0.0f }, "#000000" }{}

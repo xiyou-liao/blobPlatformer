@@ -1,3 +1,6 @@
+// Xiyou Liao
+// Lose.cpp
+
 #include "Lose.h"
 
 Lose::Lose() : Scene{ { 0.0f, 0.0f }, "#000000" } {}

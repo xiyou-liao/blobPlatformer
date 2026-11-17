@@ -1,7 +1,10 @@
+//Xiyou Liao
+//Map.h
+
 #ifndef MAP_H
 #define MAP_H
 
-#include "game.h"
+#include "Game.h"
 
 class Map{
 public:

@@ -1,4 +1,7 @@
-#include "game.h"
+//Xiyou Liao
+//Game.cpp
+
+#include "Game.h"
 
 Color ColorFromHex(const char *hex) {
     if (hex[0] == '#') hex++;

@@ -1,3 +1,6 @@
+//Xiyou Liao
+//LevelB.h
+
 #ifndef LEVELB_H
 #define LEVELB_H
 

@@ -1,3 +1,6 @@
+//Xiyou Liao
+//Start.cpp
+
 #include "Start.h"
 
 Start::Start() : Scene{ { 0.0f, 0.0f }, "#000000" } {}

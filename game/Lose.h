@@ -1,3 +1,6 @@
+//Xiyou Liao
+//Lose.h
+
 #ifndef LOSE_H
 #define LOSE_H
 

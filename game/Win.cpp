@@ -1,3 +1,6 @@
+//Xiyou Liao
+//Win.cpp
+
 #include "Win.h"
 
 Win::Win() : Scene{ { 0.0f, 0.0f }, "#000000" } {}
